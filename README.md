@@ -1,4 +1,5 @@
 pbrt, Version 3
+Modified version for nanoPU tests.
 ===============
 
 [![Build Status](https://travis-ci.org/mmp/pbrt-v3.svg?branch=master)](https://travis-ci.org/mmp/pbrt-v3)
