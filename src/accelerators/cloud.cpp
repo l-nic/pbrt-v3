@@ -277,7 +277,7 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
     TreeletInfo &info = treelet_info_[root_id];
 
     deque<TreeletNode> nodes;
-    unique_ptr<protobuf::RecordReader> reader;
+    // unique_ptr<protobuf::RecordReader> reader;
 
     // if (stream == nullptr) {
     //     reader = global::manager.GetReader(ObjectType::Treelet, root_id);
@@ -293,6 +293,8 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
     // OR just read it all into memory, and then pass in the buffer and make a copy. We don't really need this part to be super low latency,
     // so as long as it's not super slow, it should be fine.
 
+    // Right now, everything below this point uses regular protobufs that read from a stream.
+
     string buffer_str(buffer, size);
     istringstream buffer_stream(buffer_str);
 
@@ -303,7 +305,8 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
     for (int i = 0; i < num_triangle_meshes; ++i) {
         /* load the TriangleMesh if necessary */
         protobuf::TriangleMesh tm;
-        tm.ParseFromIstream(&buffer_stream);
+        bool success = tm.ParseFromIstream(&buffer_stream);
+        CHECK_EQ(success, true);
         // reader->read(&tm);
         TriangleMeshId tm_id = make_pair(root_id, tm.id());
         auto p = triangle_meshes_.emplace(
@@ -313,9 +316,10 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
     }
 
     stack<pair<uint32_t, Child>> q;
-    while (not reader->eof()) {
+    while (not buffer_stream.eof()) {
         protobuf::BVHNode proto_node;
-        bool success = reader->read(&proto_node);
+        bool success = proto_node.ParseFromIstream(&buffer_stream);
+        // bool success = reader->read(&proto_node);
         CHECK_EQ(success, true);
 
         TreeletNode node(from_protobuf(proto_node.bounds()), proto_node.axis());
@@ -340,7 +344,7 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
 
             info.children.insert(node.child_treelet[RIGHT]);
 
-            if (preload_) loadTreelet(node.child_treelet[RIGHT]);
+            // if (preload_) loadTreelet(node.child_treelet[RIGHT]);
         } else if (!is_leaf) {
             q.emplace(index, RIGHT);
         }
@@ -353,7 +357,7 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
 
             info.children.insert(node.child_treelet[LEFT]);
 
-            if (preload_) loadTreelet(node.child_treelet[LEFT]);
+            // if (preload_) loadTreelet(node.child_treelet[LEFT]);
         } else if (!is_leaf) {
             q.emplace(index, LEFT);
         }
