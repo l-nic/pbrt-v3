@@ -267,34 +267,44 @@ void CloudBVH::loadTreelet(const uint32_t root_id, istream *stream) const {
     treelet.nodes = move(nodes);
 }
 
-void CloudBVH::loadNetworkTreelet(const uint32_t root_id, istream *stream) const {
+void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t size) const {
     if (preloading_done_ or treelets_.count(root_id)) {
         return; /* this tree is already loaded */
     }
 
-    ProfilePhase _(Prof::LoadTreelet);
+    //ProfilePhase _(Prof::LoadTreelet);
 
     TreeletInfo &info = treelet_info_[root_id];
 
     deque<TreeletNode> nodes;
     unique_ptr<protobuf::RecordReader> reader;
 
-    if (stream == nullptr) {
-        reader = global::manager.GetReader(ObjectType::Treelet, root_id);
-    } else {
-        reader = make_unique<protobuf::RecordReader>(stream);
-    }
+    // if (stream == nullptr) {
+    //     reader = global::manager.GetReader(ObjectType::Treelet, root_id);
+    // } else {
+    //     reader = make_unique<protobuf::RecordReader>(stream);
+    // }
 
     auto &treelet = treelets_[root_id];
     auto &tree_primitives = treelet.primitives;
 
+    // Everything above this point should be riscv safe. We'll need to swap out the protocol buffers decode for nanopb decode on riscv,
+    // along with a custom read callback that lets nanopb read in data using the l-nic interface.
+    // OR just read it all into memory, and then pass in the buffer and make a copy. We don't really need this part to be super low latency,
+    // so as long as it's not super slow, it should be fine.
+
+    string buffer_str(buffer, size);
+    istringstream buffer_stream(buffer_str);
+
     /* read in the triangle meshes for this treelet first */
     uint32_t num_triangle_meshes = 0;
-    reader->read(&num_triangle_meshes);
+    buffer_stream >> num_triangle_meshes;
+    // reader->read(&num_triangle_meshes);
     for (int i = 0; i < num_triangle_meshes; ++i) {
         /* load the TriangleMesh if necessary */
         protobuf::TriangleMesh tm;
-        reader->read(&tm);
+        tm.ParseFromIstream(&buffer_stream);
+        // reader->read(&tm);
         TriangleMeshId tm_id = make_pair(root_id, tm.id());
         auto p = triangle_meshes_.emplace(
             tm_id, make_shared<TriangleMesh>(move(from_protobuf(tm))));

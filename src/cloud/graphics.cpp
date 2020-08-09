@@ -90,12 +90,12 @@ shared_ptr<CloudBVH> LoadTreelet(const string &path, const TreeletId treeletId,
     return treelet;
 }
 
-shared_ptr<CloudBVH> LoadNetworkTreelet(const string &path, const TreeletId treeletId,
-                                 istream *stream) {
+shared_ptr<CloudBVH> LoadNetworkTreelet(const TreeletId treeletId,
+                                 char* buffer, uint64_t size) {
     using namespace pbrt::global;
-    manager.init(path);
+    // manager.init(path);
     shared_ptr<CloudBVH> treelet = make_shared<CloudBVH>(treeletId);
-    treelet->LoadNetworkTreelet(treeletId, stream);
+    treelet->LoadNetworkTreelet(treeletId, buffer, size);
     return treelet;
 }
 

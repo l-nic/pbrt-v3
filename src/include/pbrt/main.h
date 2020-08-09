@@ -76,9 +76,9 @@ std::shared_ptr<CloudBVH> LoadTreelet(const std::string &path,
                                       const TreeletId treeletId,
                                       std::istream *stream = nullptr);
 
-std::shared_ptr<CloudBVH> LoadNetworkTreelet(const std::string &path,
+std::shared_ptr<CloudBVH> LoadNetworkTreelet(
                                       const TreeletId treeletId,
-                                      std::istream *stream = nullptr);
+                                      char* buffer, uint64_t size);
 
 void DumpSceneObjects(const std::string &description,
                       const std::string outputPath);
