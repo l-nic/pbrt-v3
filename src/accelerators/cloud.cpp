@@ -127,6 +127,7 @@ void CloudBVH::loadTreelet(const uint32_t root_id, istream *stream) const {
     /* read in the triangle meshes for this treelet first */
     uint32_t num_triangle_meshes = 0;
     reader->read(&num_triangle_meshes);
+    printf("Original num triangle meshes is %d\n", num_triangle_meshes);
     for (int i = 0; i < num_triangle_meshes; ++i) {
         /* load the TriangleMesh if necessary */
         protobuf::TriangleMesh tm;
@@ -267,7 +268,29 @@ void CloudBVH::loadTreelet(const uint32_t root_id, istream *stream) const {
     treelet.nodes = move(nodes);
 }
 
+// void CloudBVH::serializeTreeletToBuffer(string filename, char** buffer, uint64_t size) {
+//     protobuf::RecordReader treelet_reader(filename);
+//     uint32_t num_triangle_meshes = 0;
+//     treelet_reader.read(&num_triangle_meshes);
+//     for (int i = 0; i < num_triangle_meshes; ++i) {
+//         protobuf::TriangleMesh tm;
+//         bool success = treelet_reader.read(&tm);
+//         CHECK_EQ(success, true);
+//     }
+
+//     while (!treelet_reader.eof()) {
+//         protobuf::BVHNode proto_node;
+//         bool success = treelet_reader.read(&proto_node);
+//         CHECK_EQ(success, true);
+//     }
+// }
+
 void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t size) const {
+    printf("Loading network treelet\n");
+    for (int j = 0; j < 10; j++) {
+      char* current_offset = buffer + j*sizeof(uint32_t);
+      printf("%#x\n", *(uint32_t*)current_offset);
+    }
     if (preloading_done_ or treelets_.count(root_id)) {
         return; /* this tree is already loaded */
     }
@@ -294,19 +317,33 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
     // so as long as it's not super slow, it should be fine.
 
     // Right now, everything below this point uses regular protobufs that read from a stream.
+    // Eventually, everything here will need to read out the same protobuf data using the lightweight library.
 
-    string buffer_str(buffer, size);
-    istringstream buffer_stream(buffer_str);
+    //string buffer_str(buffer, size);
+    //istringstream buffer_stream(buffer_str);
+    //uint32_t next_size;
+    //buffer_stream.read((char*)&next_size, sizeof(uint32_t));
 
+    char* buf_now = buffer;
     /* read in the triangle meshes for this treelet first */
     uint32_t num_triangle_meshes = 0;
-    buffer_stream >> num_triangle_meshes;
+    memcpy(&num_triangle_meshes, buf_now, sizeof(uint32_t));
+    buf_now += sizeof(uint32_t);
+    //buffer_stream.read((char*)&num_triangle_meshes, sizeof(uint32_t));
+    printf("num triangle meshes is %d\n", num_triangle_meshes);
     // reader->read(&num_triangle_meshes);
     for (int i = 0; i < num_triangle_meshes; ++i) {
+        printf("loading triangle mesh %d\n", i);
         /* load the TriangleMesh if necessary */
+        uint32_t next_size = 0;
+        memcpy(&next_size, buf_now, sizeof(uint32_t));
+        buf_now += sizeof(uint32_t);
         protobuf::TriangleMesh tm;
-        bool success = tm.ParseFromIstream(&buffer_stream);
+        bool success = tm.ParseFromArray(buf_now, next_size);
+        //buffer_stream.read((char*)&next_size, sizeof(uint32_t));
         CHECK_EQ(success, true);
+        printf("parsed id is %d\n", tm.id());
+        buf_now += next_size;
         // reader->read(&tm);
         TriangleMeshId tm_id = make_pair(root_id, tm.id());
         auto p = triangle_meshes_.emplace(
@@ -316,11 +353,16 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
     }
 
     stack<pair<uint32_t, Child>> q;
-    while (not buffer_stream.eof()) {
+    while (buf_now < buffer + size) {
         protobuf::BVHNode proto_node;
-        bool success = proto_node.ParseFromIstream(&buffer_stream);
+        uint32_t next_size = 0;
+        memcpy(&next_size, buf_now, sizeof(uint32_t));
+        buf_now += sizeof(uint32_t);
+        bool success = proto_node.ParseFromArray(buf_now, next_size);
+        //buffer_stream.read((char*)&next_size, sizeof(uint32_t));
         // bool success = reader->read(&proto_node);
         CHECK_EQ(success, true);
+        buf_now += next_size;
 
         TreeletNode node(from_protobuf(proto_node.bounds()), proto_node.axis());
         const uint32_t index = nodes.size();

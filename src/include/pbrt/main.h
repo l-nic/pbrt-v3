@@ -80,6 +80,8 @@ std::shared_ptr<CloudBVH> LoadNetworkTreelet(
                                       const TreeletId treeletId,
                                       char* buffer, uint64_t size);
 
+void SerializeTreeletToBuffer(std::string filename, char** buffer, uint64_t* size);
+
 void DumpSceneObjects(const std::string &description,
                       const std::string outputPath);
 

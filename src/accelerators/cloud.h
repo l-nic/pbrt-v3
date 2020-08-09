@@ -51,6 +51,10 @@ class CloudBVH : public Aggregate {
         loadNetworkTreelet(root_id, buffer, size);
     }
 
+    // void SerializeTreeletToBuffer(string filename, char** buffer, uint64_t size) {
+    //     serializeTreeletToBuffer(filename, buffer, size);
+    // }
+
     const TreeletInfo &GetInfo(const uint32_t treelet_id) {
         loadTreelet(treelet_id);
         return treelet_info_.at(treelet_id);
@@ -122,6 +126,7 @@ class CloudBVH : public Aggregate {
                      std::istream *stream = nullptr) const;
     void loadNetworkTreelet(const uint32_t root_id,
                     char* buffer, uint64_t size) const;          
+    // void serializeTreeletToBuffer(string filename, char** buffer, uint64_t size);
     void clear() const;
 
     // returns array of Bounds3f with structure of Treelet's internal BVH nodes

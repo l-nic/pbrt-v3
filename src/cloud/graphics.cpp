@@ -9,6 +9,8 @@
 #include "pbrt/main.h"
 #include "pbrt/raystate.h"
 
+
+
 using namespace std;
 
 namespace pbrt {
@@ -97,6 +99,42 @@ shared_ptr<CloudBVH> LoadNetworkTreelet(const TreeletId treeletId,
     shared_ptr<CloudBVH> treelet = make_shared<CloudBVH>(treeletId);
     treelet->LoadNetworkTreelet(treeletId, buffer, size);
     return treelet;
+}
+
+// TODO: It's kind of silly that this is necessary, although having it on hand does make it very clear exactly which protobufs are
+// being serialized for the network messages and in what order.
+void SerializeTreeletToBuffer(string filename, char** buffer, uint64_t* size) {
+    protobuf::RecordReader treelet_reader(filename);
+    ostringstream raw_data_out;
+    uint32_t num_triangle_meshes = 0;
+    treelet_reader.read(&num_triangle_meshes);
+    raw_data_out.write((char*)&num_triangle_meshes, sizeof(uint32_t));
+    for (int i = 0; i < num_triangle_meshes; ++i) {
+        protobuf::TriangleMesh tm;
+        bool success = treelet_reader.read(&tm);
+        CHECK_EQ(success, true);
+        string tm_str;
+        tm.SerializeToString(&tm_str);
+        uint32_t next_size = tm_str.length();
+        raw_data_out.write((char*)&next_size, sizeof(uint32_t));
+        tm.SerializeToOstream(&raw_data_out);
+        printf("written id is %d\n", tm.id());
+    }
+
+    while (!treelet_reader.eof()) {
+        protobuf::BVHNode proto_node;
+        bool success = treelet_reader.read(&proto_node);
+        CHECK_EQ(success, true);
+        string proto_node_str;
+        proto_node.SerializeToString(&proto_node_str);
+        uint32_t next_size = proto_node_str.length();
+        raw_data_out.write((char*)&next_size, sizeof(uint32_t));
+        proto_node.SerializeToOstream(&raw_data_out);
+    }
+    string raw_data_str = raw_data_out.str();
+    *buffer = new char[raw_data_str.length()];
+    memcpy(*buffer, raw_data_str.c_str(), raw_data_str.length());
+    *size = raw_data_str.length();
 }
 
 }  // namespace scene
