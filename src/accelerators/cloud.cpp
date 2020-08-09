@@ -267,6 +267,170 @@ void CloudBVH::loadTreelet(const uint32_t root_id, istream *stream) const {
     treelet.nodes = move(nodes);
 }
 
+void CloudBVH::loadNetworkTreelet(const uint32_t root_id, istream *stream) const {
+    if (preloading_done_ or treelets_.count(root_id)) {
+        return; /* this tree is already loaded */
+    }
+
+    ProfilePhase _(Prof::LoadTreelet);
+
+    TreeletInfo &info = treelet_info_[root_id];
+
+    deque<TreeletNode> nodes;
+    unique_ptr<protobuf::RecordReader> reader;
+
+    if (stream == nullptr) {
+        reader = global::manager.GetReader(ObjectType::Treelet, root_id);
+    } else {
+        reader = make_unique<protobuf::RecordReader>(stream);
+    }
+
+    auto &treelet = treelets_[root_id];
+    auto &tree_primitives = treelet.primitives;
+
+    /* read in the triangle meshes for this treelet first */
+    uint32_t num_triangle_meshes = 0;
+    reader->read(&num_triangle_meshes);
+    for (int i = 0; i < num_triangle_meshes; ++i) {
+        /* load the TriangleMesh if necessary */
+        protobuf::TriangleMesh tm;
+        reader->read(&tm);
+        TriangleMeshId tm_id = make_pair(root_id, tm.id());
+        auto p = triangle_meshes_.emplace(
+            tm_id, make_shared<TriangleMesh>(move(from_protobuf(tm))));
+        CHECK_EQ(p.second, true);
+        triangle_mesh_material_ids_[tm_id] = tm.material_id();
+    }
+
+    stack<pair<uint32_t, Child>> q;
+    while (not reader->eof()) {
+        protobuf::BVHNode proto_node;
+        bool success = reader->read(&proto_node);
+        CHECK_EQ(success, true);
+
+        TreeletNode node(from_protobuf(proto_node.bounds()), proto_node.axis());
+        const uint32_t index = nodes.size();
+
+        if (not q.empty()) {
+            auto parent = q.top();
+            q.pop();
+
+            nodes[parent.first].child_treelet[parent.second] = root_id;
+            nodes[parent.first].child_node[parent.second] = index;
+        }
+
+        bool is_leaf = proto_node.transformed_primitives_size() ||
+                       proto_node.triangles_size();
+
+        if (proto_node.right_ref()) {
+            uint64_t right_ref = proto_node.right_ref();
+            uint16_t treeletID = (uint16_t)(right_ref >> 32);
+            node.child_treelet[RIGHT] = treeletID;
+            node.child_node[RIGHT] = (uint32_t)right_ref;
+
+            info.children.insert(node.child_treelet[RIGHT]);
+
+            if (preload_) loadTreelet(node.child_treelet[RIGHT]);
+        } else if (!is_leaf) {
+            q.emplace(index, RIGHT);
+        }
+
+        if (proto_node.left_ref()) {
+            uint64_t left_ref = proto_node.left_ref();
+            uint16_t treeletID = (uint16_t)(left_ref >> 32);
+            node.child_treelet[LEFT] = treeletID;
+            node.child_node[LEFT] = (uint32_t)left_ref;
+
+            info.children.insert(node.child_treelet[LEFT]);
+
+            if (preload_) loadTreelet(node.child_treelet[LEFT]);
+        } else if (!is_leaf) {
+            q.emplace(index, LEFT);
+        }
+
+        if (is_leaf) {
+            node.leaf_tag = ~0;
+            node.primitive_offset = tree_primitives.size();
+            node.primitive_count = proto_node.transformed_primitives_size() +
+                                   proto_node.triangles_size();
+        }
+
+        for (int i = 0; i < proto_node.transformed_primitives_size(); i++) {
+            auto &proto_tp = proto_node.transformed_primitives(i);
+
+            transforms_.push_back(move(make_unique<Transform>(
+                from_protobuf(proto_tp.transform().start_transform()))));
+            const Transform *start = transforms_.back().get();
+
+            Matrix4x4 end_mat =
+                from_protobuf(proto_tp.transform().end_transform());
+
+            const Transform *end;
+            if (start->GetMatrix() != end_mat) {
+                transforms_.push_back(move(make_unique<Transform>(end_mat)));
+                end = transforms_.back().get();
+            } else {
+                end = start;
+            }
+
+            const AnimatedTransform primitive_to_world{
+                start, proto_tp.transform().start_time(), end,
+                proto_tp.transform().end_time()};
+
+            uint64_t instance_ref = proto_tp.root_ref();
+
+            uint16_t instance_group = (uint16_t)(instance_ref >> 32);
+            uint32_t instance_node = (uint32_t)instance_ref;
+
+            if (not bvh_instances_.count(instance_ref)) {
+                if (instance_group == root_id) {
+                    bvh_instances_[instance_ref] =
+                        make_shared<IncludedInstance>(&treelet, instance_node);
+                } else {
+                    bvh_instances_[instance_ref] =
+                        make_shared<CloudBVH>(instance_group, preload_);
+                }
+            }
+
+            CloudBVH *instance =
+                dynamic_cast<CloudBVH *>(bvh_instances_[instance_ref].get());
+            if (instance) {
+                info.instances[instance_group] += node.bounds.SurfaceArea();
+            }
+
+            tree_primitives.emplace_back(move(make_unique<TransformedPrimitive>(
+                bvh_instances_.at(instance_ref), primitive_to_world)));
+        }
+
+        for (int i = 0; i < proto_node.triangles_size(); i++) {
+            auto &proto_t = proto_node.triangles(i);
+            const TriangleMeshId tm_id = make_pair(root_id, proto_t.mesh_id());
+
+            const auto material_id = triangle_mesh_material_ids_[tm_id];
+            /* load the Material if necessary */
+            if (materials_.count(material_id) == 0) {
+                auto material_reader = global::manager.GetReader(
+                    ObjectType::Material, material_id);
+                protobuf::Material material;
+                material_reader->read(&material);
+                materials_[material_id] =
+                    move(material::from_protobuf(material));
+            }
+
+            auto shape = make_shared<Triangle>(
+                &identity_transform_, &identity_transform_, false,
+                triangle_meshes_.at(tm_id), proto_t.tri_number());
+
+            tree_primitives.emplace_back(move(make_unique<GeometricPrimitive>(
+                shape, materials_[material_id], nullptr, MediumInterface{})));
+        }
+
+        nodes.emplace_back(move(node));
+    }
+
+    treelet.nodes = move(nodes);
+}
+
 void CloudBVH::Trace(RayState &rayState) const {
     SurfaceInteraction isect;
 
