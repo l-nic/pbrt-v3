@@ -84,7 +84,68 @@ Base LoadBase(const std::string &path, const int samplesPerPixel) {
 }
 
 Base::Base(char* buffer, uint64_t size, const int samplesPerPixel) {
+    using namespace pbrt::global;
 
+    PbrtOptions.nThreads = 1;
+
+    // manager.init(path);
+    char* buf_now = buffer;
+    uint32_t next_size = 0;
+    memcpy(&next_size, buf_now, sizeof(uint32_t));
+    buf_now += sizeof(uint32_t);
+    protobuf::Camera proto_camera;
+    bool success = proto_camera.ParseFromArray(buf_now, next_size);
+    CHECK_EQ(success, true);
+    buf_now += next_size;
+    camera = camera::from_protobuf(proto_camera, transformCache);
+
+    next_size = 0;
+    memcpy(&next_size, buf_now, sizeof(uint32_t));
+    buf_now += sizeof(uint32_t);
+    protobuf::Sampler proto_sampler;
+    success = proto_sampler.ParseFromArray(buf_now, next_size);
+    CHECK_EQ(success, true);
+    buf_now += next_size;
+    sampler = sampler::from_protobuf(proto_sampler, samplesPerPixel);
+
+    uint32_t num_lights = 0;
+    memcpy(&num_lights, buf_now, sizeof(uint32_t));
+    buf_now += sizeof(uint32_t);
+    for (int i = 0; i < num_lights; i++) {
+        next_size = 0;
+        memcpy(&next_size, buf_now, sizeof(uint32_t));
+        buf_now += sizeof(uint32_t);
+        protobuf::Light proto_light;
+        success = proto_light.ParseFromArray(buf_now, next_size);
+        CHECK_EQ(success, true);
+        buf_now += next_size;
+        lights.push_back(move(light::from_protobuf(proto_light)));
+    }
+
+    next_size = 0;
+    memcpy(&next_size, buf_now, sizeof(uint32_t));
+    buf_now += sizeof(uint32_t);
+    protobuf::Scene proto_scene;
+    success = proto_scene.ParseFromArray(buf_now, next_size);
+    CHECK_EQ(success, true);
+    buf_now += next_size;
+    fakeScene = make_unique<Scene>(from_protobuf(proto_scene));
+
+    for (auto &light : lights) {
+        light->Preprocess(*fakeScene);
+    }
+
+    const auto treeletCount = manager.treeletCount();
+    treeletDependencies.resize(treeletCount);
+
+    for (TreeletId i = 0; i < treeletCount; i++) {
+        treeletDependencies[i] = manager.getTreeletDependencies(i);
+    }
+
+    this->samplesPerPixel = sampler->samplesPerPixel;
+    sampleBounds = camera->film->GetSampleBounds();
+    sampleExtent = sampleBounds.Diagonal();
+    totalPaths = sampleBounds.Area() * sampler->samplesPerPixel;
 }
 
 Base LoadNetworkBase(char* buffer, uint64_t size, const int samplesPerPixel) {
