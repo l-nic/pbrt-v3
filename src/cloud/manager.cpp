@@ -57,6 +57,7 @@ string SceneManager::getFileName(const ObjectType type, const uint32_t id) {
     case ObjectType::SpectrumTexture:
     case ObjectType::Texture:
     case ObjectType::StaticAssignment:
+        cout << TYPE_PREFIXES[to_underlying(type)] + to_string(id) << endl;
         return TYPE_PREFIXES[to_underlying(type)] + to_string(id);
 
     case ObjectType::Sampler:

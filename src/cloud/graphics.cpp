@@ -103,9 +103,24 @@ shared_ptr<CloudBVH> LoadNetworkTreelet(const TreeletId treeletId,
 
 // TODO: It's kind of silly that this is necessary, although having it on hand does make it very clear exactly which protobufs are
 // being serialized for the network messages and in what order.
-void SerializeTreeletToBuffer(string filename, char** buffer, uint64_t* size) {
-    protobuf::RecordReader treelet_reader(filename);
+void SerializeTreeletToBuffer(string treelet_filename, vector<string>& mat_filenames, char** buffer, uint64_t* size) {
     ostringstream raw_data_out;
+    uint32_t num_mats = mat_filenames.size();
+    raw_data_out.write((char*)&num_mats, sizeof(uint32_t));
+    for (int i = 0; i < mat_filenames.size(); i++) {
+        protobuf::RecordReader mat_reader(mat_filenames[i]);
+        uint32_t mat_id = atoi(mat_filenames[i].substr(mat_filenames[i].find("MAT")).c_str() + strlen("MAT")); // TODO: This will probably break if MAT is somewhere earlier in the path. Fix this.
+        protobuf::Material mat;
+        bool success = mat_reader.read(&mat);
+        CHECK_EQ(success, true);
+        string mat_out_str;
+        mat.SerializeToString(&mat_out_str);
+        uint32_t next_size = mat_out_str.length();
+        raw_data_out.write((char*)&mat_id, sizeof(uint32_t));
+        raw_data_out.write((char*)&next_size, sizeof(uint32_t));
+        mat.SerializeToOstream(&raw_data_out);
+    }
+    protobuf::RecordReader treelet_reader(treelet_filename);
     uint32_t num_triangle_meshes = 0;
     treelet_reader.read(&num_triangle_meshes);
     raw_data_out.write((char*)&num_triangle_meshes, sizeof(uint32_t));

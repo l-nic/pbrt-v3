@@ -325,6 +325,25 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
     //buffer_stream.read((char*)&next_size, sizeof(uint32_t));
 
     char* buf_now = buffer;
+
+    // Load in the materials. The treelet will refer to these later, so they need to be loaded first.
+    uint32_t num_mats = 0;
+    memcpy(&num_mats, buf_now, sizeof(uint32_t));
+    buf_now += sizeof(uint32_t);
+    for (int i = 0; i < num_mats; i++) {
+        uint32_t mat_id = 0;
+        uint32_t next_size = 0;
+        memcpy(&mat_id, buf_now, sizeof(uint32_t));
+        buf_now += sizeof(uint32_t);
+        memcpy(&next_size, buf_now, sizeof(uint32_t));
+        buf_now += sizeof(uint32_t);
+        protobuf::Material mat;
+        bool success = mat.ParseFromArray(buf_now, next_size);
+        CHECK_EQ(success, true);
+        buf_now += next_size;
+        materials_[mat_id] = move(material::from_protobuf(mat));
+    }
+
     /* read in the triangle meshes for this treelet first */
     uint32_t num_triangle_meshes = 0;
     memcpy(&num_triangle_meshes, buf_now, sizeof(uint32_t));
@@ -464,14 +483,14 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
 
             const auto material_id = triangle_mesh_material_ids_[tm_id];
             /* load the Material if necessary */
-            if (materials_.count(material_id) == 0) {
-                auto material_reader = global::manager.GetReader(
-                    ObjectType::Material, material_id);
-                protobuf::Material material;
-                material_reader->read(&material);
-                materials_[material_id] =
-                    move(material::from_protobuf(material));
-            }
+            // if (materials_.count(material_id) == 0) {
+            //     auto material_reader = global::manager.GetReader(
+            //         ObjectType::Material, material_id);
+            //     protobuf::Material material;
+            //     material_reader->read(&material);
+            //     materials_[material_id] =
+            //         move(material::from_protobuf(material));
+            // }
 
             auto shape = make_shared<Triangle>(
                 &identity_transform_, &identity_transform_, false,
