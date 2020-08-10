@@ -474,6 +474,7 @@ FILE ( GLOB PBRT_SOURCE
   src/cloud/*
   src/messages/*
   src/util/*
+  src/nanopb/*
  )
 
 INCLUDE_DIRECTORIES ( src )
