@@ -145,11 +145,27 @@ set<ObjectKey> SceneManager::getRecursiveDependencies(const ObjectKey& object) {
     return allDeps;
 }
 
+void SceneManager::useNetwork(char** buf_now) {
+    _use_network = true;
+    _buf_now = buf_now;
+}
+
 void SceneManager::loadManifest() {
-    init("../treelets/");
-    auto reader = GetReader(ObjectType::Manifest);
     protobuf::Manifest manifest;
-    reader->read(&manifest);
+    if (_use_network) {
+        char* buf_now = *_buf_now;
+        uint32_t next_size = 0;
+        memcpy(&next_size, buf_now, sizeof(uint32_t));
+        buf_now += sizeof(uint32_t);
+        printf("Manifest size is %d bytes\n", next_size);
+        bool success = manifest.ParseFromArray(buf_now, next_size);
+        CHECK_EQ(success, true);
+        buf_now += next_size;
+        *_buf_now = buf_now;
+    } else {
+        auto reader = GetReader(ObjectType::Manifest);
+        reader->read(&manifest);
+    }
 
     for (const protobuf::Manifest::Object& obj : manifest.objects()) {
         ObjectKey id = from_protobuf(obj.id());
@@ -198,6 +214,7 @@ size_t SceneManager::treeletCount() {
     // }
 
     if (dependencies.empty()) {
+        printf("Loading manifest\n");
         loadManifest();
     }
 

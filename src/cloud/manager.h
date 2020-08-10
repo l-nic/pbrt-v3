@@ -50,6 +50,8 @@ class SceneManager {
 
     size_t treeletCount();
 
+    void useNetwork(char** buf_now);
+
   private:
     void loadManifest();
     void loadTreeletDependencies();
@@ -65,6 +67,9 @@ class SceneManager {
     std::map<ObjectKey, std::set<ObjectKey>> dependencies;
 
     std::map<ObjectID, std::set<ObjectKey>> treeletDependencies;
+
+    bool _use_network = false;
+    char** _buf_now = nullptr;
 };
 
 namespace global {

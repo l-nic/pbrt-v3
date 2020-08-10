@@ -66,12 +66,15 @@ Base::Base(const std::string &path, const int samplesPerPixel) {
         light->Preprocess(*fakeScene);
     }
 
+    printf("Loading treelet count\n");
     const auto treeletCount = manager.treeletCount();
     treeletDependencies.resize(treeletCount);
 
     for (TreeletId i = 0; i < treeletCount; i++) {
         treeletDependencies[i] = manager.getTreeletDependencies(i);
     }
+
+    printf("Loaded manifest\n");
 
     this->samplesPerPixel = sampler->samplesPerPixel;
     sampleBounds = camera->film->GetSampleBounds();
@@ -135,6 +138,7 @@ Base::Base(char* buffer, uint64_t size, const int samplesPerPixel) {
         light->Preprocess(*fakeScene);
     }
 
+    manager.useNetwork(&buf_now); // Extra layer of indirection allows the manager to update buf_now in case we want to use it again later.
     const auto treeletCount = manager.treeletCount();
     treeletDependencies.resize(treeletCount);
 
@@ -202,6 +206,16 @@ void SerializeBaseToBuffer(string camera_filename, string lights_filename, strin
     next_size = scene_out_str.length();
     raw_data_out.write((char*)&next_size, sizeof(uint32_t));
     scene.SerializeToOstream(&raw_data_out);
+
+    protobuf::RecordReader manifest_reader(manifest_filename);
+    protobuf::Manifest manifest;
+    success = manifest_reader.read(&manifest);
+    CHECK_EQ(success, true);
+    string manifest_out_str;
+    manifest.SerializeToString(&manifest_out_str);
+    next_size = manifest_out_str.length();
+    raw_data_out.write((char*)&next_size, sizeof(uint32_t));
+    manifest.SerializeToOstream(&raw_data_out);
 
     string raw_data_str = raw_data_out.str();
     *buffer = new char[raw_data_str.length()];
