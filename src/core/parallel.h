@@ -41,10 +41,10 @@
 // core/parallel.h*
 #include "pbrt.h"
 #include "geometry.h"
-#include <mutex>
-#include <condition_variable>
+//#include <mutex>
+//#include <condition_variable>
 #include <functional>
-#include <atomic>
+//#include <atomic>
 
 namespace pbrt {
 
@@ -64,9 +64,9 @@ class AtomicFloat {
 #else
         uint32_t oldBits = bits, newBits;
 #endif
-        do {
+        //do {
             newBits = FloatToBits(BitsToFloat(oldBits) + v);
-        } while (!bits.compare_exchange_weak(oldBits, newBits));
+        //} while (!bits.compare_exchange_weak(oldBits, newBits));
     }
 
   private:
@@ -74,7 +74,8 @@ class AtomicFloat {
 #ifdef PBRT_FLOAT_AS_DOUBLE
     std::atomic<uint64_t> bits;
 #else
-    std::atomic<uint32_t> bits;
+    // std::atomic<uint32_t> bits;
+    uint32_t bits;
 #endif
 };
 
@@ -93,8 +94,8 @@ class Barrier {
     void Wait();
 
   private:
-    std::mutex mutex;
-    std::condition_variable cv;
+    // std::mutex mutex;
+    // std::condition_variable cv;
     int count;
 };
 

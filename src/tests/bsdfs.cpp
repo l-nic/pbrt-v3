@@ -50,7 +50,7 @@ double RLGamma(double a, double x) {
 
     if (x == 0) return 0.0f;
 
-    double ax = (a * std::log(x)) - x - std::lgamma(a);
+    double ax = (a * std::log(x)) - x - lgamma(a);
     if (ax < -709.78271289338399) return a < x ? 1.0 : 0.0;
 
     if (x <= 1 || x <= a) {

@@ -38,9 +38,10 @@
 #ifdef PBRT_IS_WINDOWS
 #include <windows.h>
 #else
-#include <sys/ioctl.h>
+//#include <sys/ioctl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <math.h>
 #endif  // !PBRT_IS_WINDOWS
 
 namespace pbrt {
@@ -50,8 +51,8 @@ static int TerminalWidth();
 // ProgressReporter Method Definitions
 ProgressReporter::ProgressReporter(int64_t totalWork, const std::string &title)
     : totalWork(std::max((int64_t)1, totalWork)),
-      title(title),
-      startTime(std::chrono::system_clock::now()) {
+      title(title)/*,
+      startTime(std::chrono::system_clock::now())*/ {
     workDone = 0;
     exitThread = false;
     // Launch thread to periodically update progress bar
@@ -66,12 +67,12 @@ ProgressReporter::ProgressReporter(int64_t totalWork, const std::string &title)
         // signal handler.)
         SuspendProfiler();
         std::shared_ptr<Barrier> barrier = std::make_shared<Barrier>(2);
-        updateThread = std::thread([this, barrier]() {
-            ProfilerWorkerThreadInit();
-            ProfilerState = 0;
-            barrier->Wait();
-            PrintBar();
-        });
+        // updateThread = std::thread([this, barrier]() {
+        //     ProfilerWorkerThreadInit();
+        //     ProfilerState = 0;
+        //     barrier->Wait();
+        //     PrintBar();
+        // });
         // Wait for the thread to get past the ProfilerWorkerThreadInit()
         // call.
         barrier->Wait();
@@ -83,7 +84,7 @@ ProgressReporter::~ProgressReporter() {
     if (!PbrtOptions.quiet) {
         workDone = totalWork;
         exitThread = true;
-        updateThread.join();
+        //updateThread.join();
         printf("\n");
     }
 }
@@ -103,13 +104,13 @@ void ProgressReporter::PrintBar() {
     *s++ = ']';
     *s++ = ' ';
     *s++ = '\0';
-    fputs(buf.get(), stdout);
-    fflush(stdout);
+    // fputs(buf.get(), stdout);
+    // fflush(stdout);
 
     std::chrono::milliseconds sleepDuration(250);
     int iterCount = 0;
     while (!exitThread) {
-        std::this_thread::sleep_for(sleepDuration);
+        //std::this_thread::sleep_for(sleepDuration);
 
         // Periodically increase sleepDuration to reduce overhead of
         // updates.
@@ -125,12 +126,12 @@ void ProgressReporter::PrintBar() {
             sleepDuration *= 5;
 
         Float percentDone = Float(workDone) / Float(totalWork);
-        int plussesNeeded = std::round(totalPlusses * percentDone);
+        int plussesNeeded = round(totalPlusses * percentDone);
         while (plussesPrinted < plussesNeeded) {
             *curSpace++ = '+';
             ++plussesPrinted;
         }
-        fputs(buf.get(), stdout);
+        // fputs(buf.get(), stdout);
 
         // Update elapsed time and estimated time to completion
         Float seconds = ElapsedMS() / 1000.f;
@@ -142,7 +143,7 @@ void ProgressReporter::PrintBar() {
                    std::max((Float)0., estRemaining));
         else
             printf(" (%.1fs|?s)  ", seconds);
-        fflush(stdout);
+        // fflush(stdout);
     }
 }
 
@@ -151,31 +152,32 @@ void ProgressReporter::Done() {
 }
 
 static int TerminalWidth() {
-#ifdef PBRT_IS_WINDOWS
-    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (h == INVALID_HANDLE_VALUE || !h) {
-        fprintf(stderr, "GetStdHandle() call failed");
-        return 80;
-    }
-    CONSOLE_SCREEN_BUFFER_INFO bufferInfo = {0};
-    GetConsoleScreenBufferInfo(h, &bufferInfo);
-    return bufferInfo.dwSize.X;
-#else
-    struct winsize w;
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) < 0) {
-        // ENOTTY is fine and expected, e.g. if output is being piped to a file.
-        if (errno != ENOTTY) {
-            static bool warned = false;
-            if (!warned) {
-                warned = true;
-                fprintf(stderr, "Error in ioctl() in TerminalWidth(): %d\n",
-                        errno);
-            }
-        }
-        return 80;
-    }
-    return w.ws_col;
-#endif  // PBRT_IS_WINDOWS
+// #ifdef PBRT_IS_WINDOWS
+//     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+//     if (h == INVALID_HANDLE_VALUE || !h) {
+//         fprintf(stderr, "GetStdHandle() call failed");
+//         return 80;
+//     }
+//     CONSOLE_SCREEN_BUFFER_INFO bufferInfo = {0};
+//     GetConsoleScreenBufferInfo(h, &bufferInfo);
+//     return bufferInfo.dwSize.X;
+// #else
+//     struct winsize w;
+//     // if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) < 0) {
+//     //     // ENOTTY is fine and expected, e.g. if output is being piped to a file.
+//     //     if (errno != ENOTTY) {
+//     //         static bool warned = false;
+//     //         if (!warned) {
+//     //             warned = true;
+//     //             fprintf(stderr, "Error in ioctl() in TerminalWidth(): %d\n",
+//     //                     errno);
+//     //         }
+//     //     }
+//     //     return 80;
+//     // }
+//     return w.ws_col;
+// #endif  // PBRT_IS_WINDOWS
+return 0;
 }
 
 }  // namespace pbrt

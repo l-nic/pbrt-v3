@@ -38,7 +38,7 @@
 #include <atomic>
 #include <cinttypes>
 #include <functional>
-#include <mutex>
+//#include <mutex>
 #include <type_traits>
 #include "parallel.h"
 #include "stringprint.h"
@@ -81,8 +81,8 @@ static void ReportProfileSample(int, siginfo_t *, void *);
 
 // Statistics Definitions
 void ReportThreadStats() {
-    static std::mutex mutex;
-    std::lock_guard<std::mutex> lock(mutex);
+    //static std::mutex mutex;
+    //std::lock_guard<std::mutex> lock(mutex);
     StatRegisterer::CallCallbacks(statsAccumulator);
 }
 

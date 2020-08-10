@@ -92,7 +92,7 @@ class Film {
     std::unique_ptr<Pixel[]> pixels;
     static PBRT_CONSTEXPR int filterTableWidth = 16;
     Float filterTable[filterTableWidth * filterTableWidth];
-    std::mutex mutex;
+    //std::mutex mutex;
     const Float scale;
     const Float maxSampleLuminance;
 

@@ -37,7 +37,7 @@
 #include "progressreporter.h"
 #include "parser.h"
 
-#include <mutex>
+//#include <mutex>
 
 // Error Reporting Includes
 #include <stdarg.h>
@@ -77,8 +77,8 @@ static void processError(Loc *loc, const char *format, va_list args,
 
     // Print the error message (but not more than one time).
     static std::string lastError;
-    static std::mutex mutex;
-    std::lock_guard<std::mutex> lock(mutex);
+    //static std::mutex mutex;
+    //std::lock_guard<std::mutex> lock(mutex);
     if (errorString != lastError) {
         LOG(INFO) << errorString;
         fprintf(stderr, "%s\n", errorString.c_str());

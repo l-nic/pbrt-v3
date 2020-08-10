@@ -117,7 +117,8 @@ void Film::Clear() {
 void Film::MergeFilmTile(std::unique_ptr<FilmTile> tile) {
     ProfilePhase p(Prof::MergeFilmTile);
     VLOG(1) << "Merging film tile " << tile->pixelBounds;
-    std::lock_guard<std::mutex> lock(mutex);
+    // TODO: This is the only thing we might want to have run in parallel. (But it'll be on x86 hosts anyway if we do it like this.)
+    //std::lock_guard<std::mutex> lock(mutex);
     for (Point2i pixel : tile->GetPixelBounds()) {
         // Merge _pixel_ into _Film::pixels_
         const FilmTilePixel &tilePixel = tile->GetPixel(pixel);

@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <dirent.h>
+//#include <dirent.h>
 #include <libgen.h>
 #include <deque>
 #include <climits>
@@ -26,23 +26,23 @@ using namespace std;
 
 namespace pbrt::roost {
   Directory::Directory( const string & path )
-    : fd_( CheckSystemCall( "open directory (" + path + ")",
+    : fd_( -1)/*CheckSystemCall( "open directory (" + path + ")",
                             open( path.c_str(),
-                            O_DIRECTORY | O_CLOEXEC ) ) )
+                            O_DIRECTORY | O_CLOEXEC ) ) ) */
   {}
 
   Directory::Directory( const Directory & parent, const string & path )
-    : fd_( CheckSystemCall( "openat directory (" + path + ")",
+    : fd_( -1)/*CheckSystemCall( "openat directory (" + path + ")",
                             openat( parent.num(), path.c_str(),
-                            O_DIRECTORY | O_CLOEXEC ) ) )
+                            O_DIRECTORY | O_CLOEXEC ) ) )*/
   {}
 
   Directory::~Directory()
   {
-    try {
-      CheckSystemCall( "close", close( fd_ ) );
-    }
-    catch ( const exception & e ) {}
+    // try {
+    //   CheckSystemCall( "close", close( fd_ ) );
+    // }
+    // catch ( const exception & e ) {}
   }
 
   path::path()
@@ -121,223 +121,223 @@ namespace pbrt::roost {
 
   off_t file_size( const path & pathn )
   {
-    struct stat file_info;
-    CheckSystemCall( "stat " + pathn.string(),
-                     stat( pathn.string().c_str(), &file_info ) );
-    return file_info.st_size;
+    // struct stat file_info;
+    // CheckSystemCall( "stat " + pathn.string(),
+    //                  stat( pathn.string().c_str(), &file_info ) );
+    // return file_info.st_size;
   }
 
   off_t file_size_at( const FileDescriptor & dirfd, const path & pathn )
   {
-    struct stat file_info;
-    CheckSystemCall( "fstatat " + pathn.string(),
-                     fstatat( dirfd.fd_num(),
-                              pathn.string().c_str(), &file_info, 0) );
-    return file_info.st_size;
+    // struct stat file_info;
+    // CheckSystemCall( "fstatat " + pathn.string(),
+    //                  fstatat( dirfd.fd_num(),
+    //                           pathn.string().c_str(), &file_info, 0) );
+    // return file_info.st_size;
   }
 
   path canonical( const path & pathn )
   {
-    char canonical_file_name[ PATH_MAX ];
+    // char canonical_file_name[ PATH_MAX ];
 
-    if ( nullptr == realpath( pathn.string().c_str(), canonical_file_name ) ) {
-      throw unix_error( "realpath", errno );
-    }
+    // if ( nullptr == realpath( pathn.string().c_str(), canonical_file_name ) ) {
+    //   throw unix_error( "realpath", errno );
+    // }
 
-    return string( canonical_file_name );
+    // return string( canonical_file_name );
   }
 
   path dirname( const path & pathn )
   {
-    char path_cstr[ PATH_MAX ];
-    strcpy( path_cstr, pathn.string().c_str() );
-    return ::dirname( path_cstr );
+    // char path_cstr[ PATH_MAX ];
+    // strcpy( path_cstr, pathn.string().c_str() );
+    // return ::dirname( path_cstr );
   }
 
   path rbasename( const path & pathn )
   {
-    char path_cstr[ PATH_MAX ];
-    strcpy( path_cstr, pathn.string().c_str() );
-    return ::basename( path_cstr );
+    // char path_cstr[ PATH_MAX ];
+    // strcpy( path_cstr, pathn.string().c_str() );
+    // return ::basename( path_cstr );
   }
 
   void symlink( const path & target, const path & linkpath )
   {
-    CheckSystemCall( "symlink", ::symlink( target.string().c_str(),
-                                           linkpath.string().c_str() ) );
+    // CheckSystemCall( "symlink", ::symlink( target.string().c_str(),
+    //                                        linkpath.string().c_str() ) );
   }
 
   path current_working_directory()
   {
-    char path_cstr[ PATH_MAX ];
-    if ( getcwd( path_cstr, sizeof( path_cstr ) ) == nullptr ) {
-      throw unix_error( "cannot get current working directory" );
-    }
-    return { path_cstr };
+    // char path_cstr[ PATH_MAX ];
+    // if ( getcwd( path_cstr, sizeof( path_cstr ) ) == nullptr ) {
+    //   throw unix_error( "cannot get current working directory" );
+    // }
+    // return { path_cstr };
   }
 
   void move_file( const path & src, const path & dst )
   {
-    /* attempt simple rename (will work if on same filesystem) */
-    const int rename_result = ::rename( src.string().c_str(),
-                                        dst.string().c_str() );
+    // /* attempt simple rename (will work if on same filesystem) */
+    // const int rename_result = ::rename( src.string().c_str(),
+    //                                     dst.string().c_str() );
 
-    if ( rename_result == 0 ) {
-      return;
-    }
-    else if ( errno != EXDEV ) {
-      throw unix_error( "rename()" );
-    }
+    // if ( rename_result == 0 ) {
+    //   return;
+    // }
+    // else if ( errno != EXDEV ) {
+    //   throw unix_error( "rename()" );
+    // }
 
-    /* failed, so make copy onto target filesystem first */
-    copy_then_rename( src, dst );
-    remove( src );
+    // /* failed, so make copy onto target filesystem first */
+    // copy_then_rename( src, dst );
+    // remove( src );
   }
 
   void atomic_create( const string & contents, const path & dst,
                       const bool set_mode, const mode_t target_mode )
   {
-    string tmp_file_name;
-    {
-      UniqueFile tmp_file { dst.string() };
-      tmp_file_name = tmp_file.name();
+    // string tmp_file_name;
+    // {
+    //   UniqueFile tmp_file { dst.string() };
+    //   tmp_file_name = tmp_file.name();
 
-      if ( contents.size() > 0 ) {
-        tmp_file.fd().write( contents );
-      }
+    //   if ( contents.size() > 0 ) {
+    //     tmp_file.fd().write( contents );
+    //   }
 
-      if ( set_mode ) {
-        CheckSystemCall( "fchmod", fchmod( tmp_file.fd().fd_num(), target_mode ) );
-      }
+    //   if ( set_mode ) {
+    //     CheckSystemCall( "fchmod", fchmod( tmp_file.fd().fd_num(), target_mode ) );
+    //   }
 
-      /* allow block to end so the UniqueFile gets closed() before rename. */
-      /* not 100% sure readers will see fully-written file appear atomically otherwise */
-    }
+    //   /* allow block to end so the UniqueFile gets closed() before rename. */
+    //   /* not 100% sure readers will see fully-written file appear atomically otherwise */
+    // }
 
-    rename( tmp_file_name, dst.string() );
+    // rename( tmp_file_name, dst.string() );
   }
 
   void copy_then_rename( const path & src, const path & dst,
                          const bool set_mode, const mode_t target_mode )
   {
-    /* read input file into memory */
-    FileDescriptor src_file { CheckSystemCall( "open (" + src.string() + ")",
-                              open( src.string().c_str(), O_RDONLY ) ) };
-    struct stat src_info;
-    CheckSystemCall( "fstat", fstat( src_file.fd_num(), &src_info ) );
+  //   /* read input file into memory */
+  //   FileDescriptor src_file { CheckSystemCall( "open (" + src.string() + ")",
+  //                             open( src.string().c_str(), O_RDONLY ) ) };
+  //   struct stat src_info;
+  //   CheckSystemCall( "fstat", fstat( src_file.fd_num(), &src_info ) );
 
-    if ( not S_ISREG( src_info.st_mode ) ) {
-      throw runtime_error( src.string() + " is not a regular file" );
-    }
+  //   if ( not S_ISREG( src_info.st_mode ) ) {
+  //     throw runtime_error( src.string() + " is not a regular file" );
+  //   }
 
-    const string contents = src_file.read_exactly( src_info.st_size );
+  //   const string contents = src_file.read_exactly( src_info.st_size );
 
-    /* write out to new file */
-    atomic_create( contents, dst, true, set_mode ? target_mode : src_info.st_mode );
-  }
+  //   /* write out to new file */
+  //   atomic_create( contents, dst, true, set_mode ? target_mode : src_info.st_mode );
+  // }
 
-  path operator/( const path & prefix, const path & suffix )
-  {
-    if ( ( not prefix.string().empty() and prefix.string().back() == '/' ) or
-         ( not suffix.string().empty() and suffix.string().front() == '/') ) {
-      return prefix.string() + suffix.string();
-    }
-    else {
-      return prefix.string() + "/" + suffix.string();
-    }
+  // path operator/( const path & prefix, const path & suffix )
+  // {
+  //   if ( ( not prefix.string().empty() and prefix.string().back() == '/' ) or
+  //        ( not suffix.string().empty() and suffix.string().front() == '/') ) {
+  //     return prefix.string() + suffix.string();
+  //   }
+  //   else {
+  //     return prefix.string() + "/" + suffix.string();
+  //   }
   }
 
   void create_directories_relative( const Directory & parent_directory,
                                     const vector<string>::const_iterator & begin,
                                     const vector<string>::const_iterator & end )
   {
-    if ( begin == end ) {
-      return;
-    }
+    // if ( begin == end ) {
+    //   return;
+    // }
 
-    /* empty path component -> skip */
-    if ( begin->empty() ) {
-      return create_directories_relative( parent_directory, begin + 1, end );
-    }
+    // /* empty path component -> skip */
+    // if ( begin->empty() ) {
+    //   return create_directories_relative( parent_directory, begin + 1, end );
+    // }
 
-    try {
-      CheckSystemCall( "mkdirat (" + *begin + ")",
-                       mkdirat( parent_directory.num(),
-                       begin->c_str(),
-                       S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH ) );
-    }
-    catch ( const unix_error & e ) {
-      if ( e.error_code() == EEXIST ) {
-        /* okay */
-      }
-      else {
-        throw;
-      }
-    }
+    // try {
+    //   CheckSystemCall( "mkdirat (" + *begin + ")",
+    //                    mkdirat( parent_directory.num(),
+    //                    begin->c_str(),
+    //                    S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH ) );
+    // }
+    // catch ( const unix_error & e ) {
+    //   if ( e.error_code() == EEXIST ) {
+    //     /* okay */
+    //   }
+    //   else {
+    //     throw;
+    //   }
+    // }
 
-    create_directories_relative( Directory( parent_directory, *begin ), begin + 1, end );
+    // create_directories_relative( Directory( parent_directory, *begin ), begin + 1, end );
   }
 
   void create_directories( const path & pathn )
   {
-    vector<string> components = pathn.path_components();
-    if ( components.empty() ) {
-      return;
-    }
+    // vector<string> components = pathn.path_components();
+    // if ( components.empty() ) {
+    //   return;
+    // }
 
-    if ( components.front().empty() ) {
-      components.front() = "/";
-    }
+    // if ( components.front().empty() ) {
+    //   components.front() = "/";
+    // }
 
-    create_directories_relative( Directory( "." ), components.begin(), components.end() );
+    // create_directories_relative( Directory( "." ), components.begin(), components.end() );
   }
 
   bool is_directory( const path & pathn )
   {
-    struct stat file_info;
-    CheckSystemCall( "stat " + pathn.string(),
-                     stat( pathn.string().c_str(), &file_info ) );
-    return S_ISDIR( file_info.st_mode );
+    // struct stat file_info;
+    // CheckSystemCall( "stat " + pathn.string(),
+    //                  stat( pathn.string().c_str(), &file_info ) );
+    // return S_ISDIR( file_info.st_mode );
   }
 
   bool is_directory_at( const Directory & parent_directory, const path & pathn )
   {
-    struct stat file_info;
-    CheckSystemCall( "fstatat " + pathn.string(),
-                     fstatat( parent_directory.num(), pathn.string().c_str(),
-                              &file_info, AT_SYMLINK_NOFOLLOW ) );
-    return S_ISDIR( file_info.st_mode );
+    // struct stat file_info;
+    // CheckSystemCall( "fstatat " + pathn.string(),
+    //                  fstatat( parent_directory.num(), pathn.string().c_str(),
+    //                           &file_info, AT_SYMLINK_NOFOLLOW ) );
+    // return S_ISDIR( file_info.st_mode );
   }
 
   bool exists_and_is_directory( const path & pathn )
   {
-    struct stat file_info;
-    if ( stat( pathn.string().c_str(), &file_info ) ) {
-      return false;
-    }
-    return S_ISDIR( file_info.st_mode );
+    // struct stat file_info;
+    // if ( stat( pathn.string().c_str(), &file_info ) ) {
+    //   return false;
+    // }
+    // return S_ISDIR( file_info.st_mode );
   }
 
   vector<string> path::path_components() const
   {
-    return split( path_, "/" );
+   // return split( path_, "/" );
   }
 
   bool remove( const path & pathn )
   {
-    CheckSystemCall( "remove " + pathn.string(),
-                     ::remove( pathn.string().c_str() ) );
+    // CheckSystemCall( "remove " + pathn.string(),
+    //                  ::remove( pathn.string().c_str() ) );
 
-    return true;
+    // return true;
   }
 
   bool remove_at( const Directory & parent_directory, const path & pathn,
                   const bool is_directory )
   {
-    CheckSystemCall( "unlinkat " + pathn.string(),
-                     unlinkat( parent_directory.num(),
-                               pathn.string().c_str(),
-                               is_directory ? AT_REMOVEDIR : 0 ) );
+    // CheckSystemCall( "unlinkat " + pathn.string(),
+    //                  unlinkat( parent_directory.num(),
+    //                            pathn.string().c_str(),
+    //                            is_directory ? AT_REMOVEDIR : 0 ) );
 
     return true;
   }
@@ -345,180 +345,180 @@ namespace pbrt::roost {
   void empty_directory_recursive( const Directory & parent_directory,
                                   const string & pathn )
   {
-    Directory directory( parent_directory, pathn );
+  //   Directory directory( parent_directory, pathn );
 
-    shared_ptr<DIR> dir { fdopendir( directory.num() ), closedir };
+  //   shared_ptr<DIR> dir { fdopendir( directory.num() ), closedir };
 
-    if ( dir.get() == NULL ) {
-      throw unix_error( "fdopendir" );
-    }
+  //   if ( dir.get() == NULL ) {
+  //     throw unix_error( "fdopendir" );
+  //   }
 
-    struct dirent * entry = NULL;
+  //   struct dirent * entry = NULL;
 
-    while ( ( errno = 0, entry = readdir( dir.get() ) ) != NULL ) {
-      string name { entry->d_name };
+  //   while ( ( errno = 0, entry = readdir( dir.get() ) ) != NULL ) {
+  //     string name { entry->d_name };
 
-      if ( name == "." or name  == ".." ) {
-        continue;
-      }
+  //     if ( name == "." or name  == ".." ) {
+  //       continue;
+  //     }
 
-      bool is_dir = is_directory_at( directory, name );
+  //     bool is_dir = is_directory_at( directory, name );
 
-      if ( is_dir ) {
-        empty_directory_recursive( directory, name );
-      }
+  //     if ( is_dir ) {
+  //       empty_directory_recursive( directory, name );
+  //     }
 
-      remove_at( directory, name, is_dir );
-    }
+  //     remove_at( directory, name, is_dir );
+  //   }
 
-    if ( errno ) {
-      throw unix_error( "readdir" );
-    }
+  //   if ( errno ) {
+  //     throw unix_error( "readdir" );
+  //   }
   }
 
-  void remove_directory( const path & pathn )
-  {
-    Directory directory { pathn.string() };
-    empty_directory_recursive( directory, "." );
-    remove( pathn );
-  }
+   void remove_directory( const path & pathn )
+   {
+  //   Directory directory { pathn.string() };
+  //   empty_directory_recursive( directory, "." );
+  //   remove( pathn );
+  // }
 
-  void empty_directory( const path & pathn )
-  {
-    Directory directory { pathn.string() };
-    shared_ptr<DIR> dir { fdopendir( directory.num() ), closedir };
+  // void empty_directory( const path & pathn )
+  // {
+  //   Directory directory { pathn.string() };
+  //   shared_ptr<DIR> dir { fdopendir( directory.num() ), closedir };
 
-    if ( dir.get() == nullptr ) {
-      throw unix_error( "fdopendir" );
-    }
+  //   if ( dir.get() == nullptr ) {
+  //     throw unix_error( "fdopendir" );
+  //   }
 
-    struct dirent * entry = NULL;
+  //   struct dirent * entry = NULL;
 
-    while ( ( errno = 0, entry = readdir( dir.get() ) ) != NULL ) {
-      string name { entry->d_name };
+  //   while ( ( errno = 0, entry = readdir( dir.get() ) ) != NULL ) {
+  //     string name { entry->d_name };
 
-      if ( name == "." or name  == ".." ) {
-        continue;
-      }
+  //     if ( name == "." or name  == ".." ) {
+  //       continue;
+  //     }
 
-      bool is_dir = is_directory_at( directory, name );
+  //     bool is_dir = is_directory_at( directory, name );
 
-      if ( not is_dir ) {
-        remove_at( directory, name, is_dir );
-      }
-    }
+  //     if ( not is_dir ) {
+  //       remove_at( directory, name, is_dir );
+  //     }
+  //   }
 
-    if ( errno ) {
-      throw unix_error( "readdir" );
-    }
+  //   if ( errno ) {
+  //     throw unix_error( "readdir" );
+  //   }
   }
 
   vector<string> list_directory( const path & pathn )
   {
-    shared_ptr<DIR> dir { opendir( pathn.string().c_str() ), closedir };
-    struct dirent * entry = NULL;
+    // shared_ptr<DIR> dir { opendir( pathn.string().c_str() ), closedir };
+    // struct dirent * entry = NULL;
 
-    if ( not dir ) {
-      throw runtime_error( "cannot open directory: " + pathn.string() );
-    }
+    // if ( not dir ) {
+    //   throw runtime_error( "cannot open directory: " + pathn.string() );
+    // }
 
-    vector<string> output;
+    // vector<string> output;
 
-    while ( ( entry = readdir( dir.get() ) ) != NULL ) {
-      output.emplace_back( entry->d_name );
-    }
+    // while ( ( entry = readdir( dir.get() ) ) != NULL ) {
+    //   output.emplace_back( entry->d_name );
+    // }
 
-    return output;
+    // return output;
   }
 
   void rename( const path & oldpath, const path & newpath )
   {
-    CheckSystemCall( "rename", ::rename( oldpath.string().c_str(),
-                                         newpath.string().c_str() ) );
+    // CheckSystemCall( "rename", ::rename( oldpath.string().c_str(),
+    //                                      newpath.string().c_str() ) );
   }
 
   vector<string> get_directory_listing( const path & pathn )
   {
-    Directory directory( pathn.string() );
-    shared_ptr<DIR> dir { fdopendir( directory.num() ), closedir };
+    // Directory directory( pathn.string() );
+    // shared_ptr<DIR> dir { fdopendir( directory.num() ), closedir };
 
-    if ( dir.get() == NULL ) {
-      throw unix_error( "fdopendir" );
-    }
+    // if ( dir.get() == NULL ) {
+    //   throw unix_error( "fdopendir" );
+    // }
 
-    vector<string> result;
+    // vector<string> result;
 
-    struct dirent * entry = NULL;
-    while ( ( errno = 0, entry = readdir( dir.get() ) ) != NULL ) {
-      string name { entry->d_name };
-      if ( name != ".." and name != "." ) {
-        result.push_back( name );
-      }
-    }
+    // struct dirent * entry = NULL;
+    // while ( ( errno = 0, entry = readdir( dir.get() ) ) != NULL ) {
+    //   string name { entry->d_name };
+    //   if ( name != ".." and name != "." ) {
+    //     result.push_back( name );
+    //   }
+    // }
 
-    if ( errno ) {
-      throw unix_error( "readdir" );
-    }
+    // if ( errno ) {
+    //   throw unix_error( "readdir" );
+    // }
 
-    return result;
+    // return result;
   }
 
   void chmod( const path & pathn, mode_t mode )
   {
-    CheckSystemCall( "chmod", ::chmod( pathn.string().c_str(), mode ) );
+    //CheckSystemCall( "chmod", ::chmod( pathn.string().c_str(), mode ) );
   }
 
   void chdir( const path & pathn )
   {
-    CheckSystemCall( "chdir", ::chdir( pathn.string().c_str() ) );
+    //CheckSystemCall( "chdir", ::chdir( pathn.string().c_str() ) );
   }
 
   string read_file( const path & pathn )
   {
     /* read input file into memory */
-    FileDescriptor in_file { CheckSystemCall( "open (" + pathn.string() + ")",
-                              open( pathn.string().c_str(), O_RDONLY ) ) };
-    struct stat pathn_info;
-    CheckSystemCall( "fstat", fstat( in_file.fd_num(), &pathn_info ) );
+  //   FileDescriptor in_file { CheckSystemCall( "open (" + pathn.string() + ")",
+  //                             open( pathn.string().c_str(), O_RDONLY ) ) };
+  //   struct stat pathn_info;
+  //   CheckSystemCall( "fstat", fstat( in_file.fd_num(), &pathn_info ) );
 
-    if ( not S_ISREG( pathn_info.st_mode ) ) {
-      throw runtime_error( pathn.string() + " is not a regular file" );
-    }
+  //   if ( not S_ISREG( pathn_info.st_mode ) ) {
+  //     throw runtime_error( pathn.string() + " is not a regular file" );
+  //   }
 
-    return in_file.read_exactly( pathn_info.st_size );
-  }
+  //   return in_file.read_exactly( pathn_info.st_size );
+   }
 
   void make_executable( const path & pathn )
   {
-    struct stat file_info;
-    CheckSystemCall( "stat " + pathn.string(),
-                     stat( pathn.string().c_str(), &file_info ) );
-    chmod( pathn, file_info.st_mode | S_IXUSR );
+    // struct stat file_info;
+    // CheckSystemCall( "stat " + pathn.string(),
+    //                  stat( pathn.string().c_str(), &file_info ) );
+    // chmod( pathn, file_info.st_mode | S_IXUSR );
   }
 
   bool is_executable( const path & pathn )
   {
-    struct stat file_info;
-    CheckSystemCall( "stat", stat( pathn.string().c_str(), &file_info ) );
-    return file_info.st_mode & S_IXUSR;
+    // struct stat file_info;
+    // CheckSystemCall( "stat", stat( pathn.string().c_str(), &file_info ) );
+    // return file_info.st_mode & S_IXUSR;
   }
 
   string readlink( const path & pathn )
   {
-    char result[ PATH_MAX ];
+    // char result[ PATH_MAX ];
 
-    ssize_t len = CheckSystemCall( "readlink", ::readlink( pathn.string().c_str(), result, sizeof( result ) ) );
-    result[ len ] = '\0';
+    // ssize_t len = CheckSystemCall( "readlink", ::readlink( pathn.string().c_str(), result, sizeof( result ) ) );
+    // result[ len ] = '\0';
 
-    return { result };
+    // return { result };
   }
 
   bool is_absolute( const path & pathn )
   {
-    if ( pathn.string().length() == 0 ) {
-      return false;
-    }
+    // if ( pathn.string().length() == 0 ) {
+    //   return false;
+    // }
 
-    return ( pathn.string().at( 0 ) == '/' );
+    // return ( pathn.string().at( 0 ) == '/' );
   }
 }

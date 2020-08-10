@@ -41,8 +41,8 @@ TEST(FloatingPoint, NextUpDownFloat) {
         float f = GetFloat(rng);
         if (std::isinf(f)) continue;
 
-        EXPECT_EQ(std::nextafter(f, (float)Infinity), NextFloatUp(f));
-        EXPECT_EQ(std::nextafter(f, -(float)Infinity), NextFloatDown(f));
+        EXPECT_EQ(nextafter(f, (float)Infinity), NextFloatUp(f));
+        EXPECT_EQ(nextafter(f, -(float)Infinity), NextFloatDown(f));
     }
 }
 
@@ -61,8 +61,8 @@ TEST(FloatingPoint, NextUpDownDouble) {
         double d = GetDouble(rng);
         if (std::isinf(d)) continue;
 
-        EXPECT_EQ(std::nextafter(d, (double)Infinity), NextFloatUp(d));
-        EXPECT_EQ(std::nextafter(d, -(double)Infinity), NextFloatDown(d));
+        EXPECT_EQ(nextafter(d, (double)Infinity), NextFloatUp(d));
+        EXPECT_EQ(nextafter(d, -(double)Infinity), NextFloatDown(d));
     }
 }
 

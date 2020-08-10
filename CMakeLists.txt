@@ -70,17 +70,17 @@ SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 ###########################################################################
 # Annoying compiler-specific details
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-conversion-null")
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register")
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
   FIND_PROGRAM(XIAR xiar)
   IF(XIAR)
@@ -316,23 +316,23 @@ SET(OPENEXR_NAMESPACE_VERSIONING OFF CACHE BOOL " " FORCE)
 SET(OPENEXR_BUILD_SHARED_LIBS    OFF CACHE BOOL " " FORCE)
 SET(ILMBASE_BUILD_SHARED_LIBS    OFF CACHE BOOL " " FORCE)
 
-ADD_SUBDIRECTORY(src/ext/openexr)
+# ADD_SUBDIRECTORY(src/ext/openexr)
 
-SET_PROPERTY(TARGET IexMath eLut toFloat b44ExpLogTable dwaLookups IlmThread Half Iex Imath IlmImf PROPERTY FOLDER "ext")
+# SET_PROPERTY(TARGET IexMath eLut toFloat b44ExpLogTable dwaLookups IlmThread Half Iex Imath IlmImf PROPERTY FOLDER "ext")
 
-INCLUDE_DIRECTORIES (
-  src/ext/openexr/IlmBase/Imath
-  src/ext/openexr/IlmBase/Half
-  src/ext/openexr/IlmBase/Iex
-  src/ext/openexr/OpenEXR/IlmImf
-  ${CMAKE_CURRENT_BINARY_DIR}/src/ext/openexr/IlmBase/config
-  ${CMAKE_CURRENT_BINARY_DIR}/src/ext/openexr/OpenEXR/config
-)
-IF(WIN32)
-  SET(OPENEXR_LIBS IlmImf Imath Half ${ZLIB_LIBRARY})
-ELSE()
-  SET(OPENEXR_LIBS IlmImf Imath Half)
-ENDIF()
+# INCLUDE_DIRECTORIES (
+#   src/ext/openexr/IlmBase/Imath
+#   src/ext/openexr/IlmBase/Half
+#   src/ext/openexr/IlmBase/Iex
+#   src/ext/openexr/OpenEXR/IlmImf
+#   ${CMAKE_CURRENT_BINARY_DIR}/src/ext/openexr/IlmBase/config
+#   ${CMAKE_CURRENT_BINARY_DIR}/src/ext/openexr/OpenEXR/config
+# )
+# IF(WIN32)
+#   SET(OPENEXR_LIBS IlmImf Imath Half ${ZLIB_LIBRARY})
+# ELSE()
+#   SET(OPENEXR_LIBS IlmImf Imath Half)
+# ENDIF()
 
 ###########################################################################
 # glog
@@ -534,16 +534,16 @@ INCLUDE(FindProtobuf)
 FIND_PACKAGE(Protobuf REQUIRED)
 
 INCLUDE(FindLZ4)
-FIND_PACKAGE(LZ4 REQUIRED)
+# FIND_PACKAGE(LZ4 REQUIRED)
 
 SET(ALL_PBRT_LIBS
   pbrt
   pbrt_messages
   ${CMAKE_THREAD_LIBS_INIT}
-  ${OPENEXR_LIBS}
+  # ${OPENEXR_LIBS}
   glog
   Ptex_static
-  ${LZ4_LIBRARY}
+  # ${LZ4_LIBRARY}
   ${ZLIB_LIBRARY}
   ${Protobuf_LIBRARIES}
 )
@@ -581,7 +581,7 @@ SET_TARGET_PROPERTIES ( pbrt_static_exe PROPERTIES OUTPUT_NAME pbrt-static )
 TARGET_COMPILE_FEATURES ( pbrt_static_exe PRIVATE ${PBRT_CXX11_FEATURES} )
 TARGET_LINK_LIBRARIES ( pbrt_static_exe ${ALL_PBRT_LIBS} dl z unwind lzma
                                         -static -Wl,-allow-multiple-definition
-                                        -Wl,--whole-archive -lpthread
+                                        -Wl,--whole-archive
                                         -Wl,--no-whole-archive -s )
 
 ## Cloud rendering

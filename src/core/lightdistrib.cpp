@@ -40,6 +40,7 @@
 #include "stats.h"
 #include "integrator.h"
 #include <numeric>
+#include <math.h>
 
 namespace pbrt {
 
@@ -103,7 +104,7 @@ SpatialLightDistribution::SpatialLightDistribution(const Scene &scene,
     Vector3f diag = b.Diagonal();
     Float bmax = diag[b.MaximumExtent()];
     for (int i = 0; i < 3; ++i) {
-        nVoxels[i] = std::max(1, int(std::round(diag[i] / bmax * maxVoxels)));
+        nVoxels[i] = std::max(1, int(round(diag[i] / bmax * maxVoxels)));
         // In the Lookup() method, we require that 20 or fewer bits be
         // sufficient to represent each coordinate value. It's fairly hard
         // to imagine that this would ever be a problem.

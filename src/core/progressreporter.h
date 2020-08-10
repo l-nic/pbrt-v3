@@ -40,9 +40,9 @@
 
 // core/progressreporter.h*
 #include "pbrt.h"
-#include <atomic>
-#include <chrono>
-#include <thread>
+//#include <atomic>
+//#include <chrono>
+//#include <thread>
 
 namespace pbrt {
 
@@ -57,12 +57,12 @@ class ProgressReporter {
         workDone += num;
     }
     Float ElapsedMS() const {
-        std::chrono::system_clock::time_point now =
-            std::chrono::system_clock::now();
-        int64_t elapsedMS =
-            std::chrono::duration_cast<std::chrono::milliseconds>(now -
-                                                                  startTime)
-                .count();
+        // std::chrono::system_clock::time_point now =
+        //     std::chrono::system_clock::now();
+        int64_t elapsedMS = 0;
+            // std::chrono::duration_cast<std::chrono::milliseconds>(now -
+            //                                                       startTime)
+            //     .count();
         return (Float)elapsedMS;
     }
     void Done();
@@ -74,10 +74,10 @@ class ProgressReporter {
     // ProgressReporter Private Data
     const int64_t totalWork;
     const std::string title;
-    const std::chrono::system_clock::time_point startTime;
-    std::atomic<int64_t> workDone;
-    std::atomic<bool> exitThread;
-    std::thread updateThread;
+    //const std::chrono::system_clock::time_point startTime;
+    int64_t workDone;
+    bool exitThread;
+    // std::thread updateThread;
 };
 
 }  // namespace pbrt
