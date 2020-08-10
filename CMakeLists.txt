@@ -475,6 +475,7 @@ FILE ( GLOB PBRT_SOURCE
   src/messages/*
   src/util/*
   src/nanopb/*
+  src/messages/nanopb/*
  )
 
 INCLUDE_DIRECTORIES ( src )

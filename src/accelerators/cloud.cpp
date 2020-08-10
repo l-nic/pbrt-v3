@@ -14,6 +14,7 @@
 #include "messages/utils.h"
 #include "nanopb/pb_decode.h"
 #include "pbrt.pb.h"
+#include "messages/nanopb/pbrt.pb.h"
 #include "shapes/triangle.h"
 
 using namespace std;
@@ -339,7 +340,11 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
         memcpy(&next_size, buf_now, sizeof(uint32_t));
         buf_now += sizeof(uint32_t);
 
-        pb_istream_t stream = pb_istream_from_buffer((const pb_byte_t*)buf_now, next_size);
+        // pbrt_protobuf_Material mat = pbrt_protobuf_Material_init_zero;
+        // pb_istream_t stream = pb_istream_from_buffer((const pb_byte_t*)buf_now, next_size);
+        // bool success = pb_decode(&stream, pbrt_protobuf_Material_fields, &mat);
+        // CHECK_EQ(success, true);
+        // buf_now += next_size;
 
         protobuf::Material mat;
         bool success = mat.ParseFromArray(buf_now, next_size);
