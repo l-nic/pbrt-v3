@@ -83,6 +83,18 @@ Base LoadBase(const std::string &path, const int samplesPerPixel) {
     return {path, samplesPerPixel};
 }
 
+Base::Base(char* buffer, uint64_t size, const int samplesPerPixel) {
+
+}
+
+Base LoadNetworkBase(char* buffer, uint64_t size, const int samplesPerPixel) {
+    return {buffer, size, samplesPerPixel};
+}
+
+void SerializeBaseToBuffer(string camera_filename, string lights_filename, string sampler_filename, string scene_filename, char** buffer, uint64_t* size) {
+
+}
+
 shared_ptr<CloudBVH> LoadTreelet(const string &path, const TreeletId treeletId,
                                  istream *stream) {
     using namespace pbrt::global;

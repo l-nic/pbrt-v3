@@ -59,6 +59,7 @@ class Base {
     Base &operator=(Base &&);
 
     Base(const std::string &path, const int samplesPerPixel);
+    Base(char* buffer, uint64_t size, const int samplesPerPixel);
     ~Base();
 
     std::set<ObjectKey> &GetTreeletDependencies(const TreeletId treeletId) {
@@ -72,6 +73,8 @@ std::string GetObjectName(const ObjectType type, const uint32_t id);
 
 Base LoadBase(const std::string &path, const int samplesPerPixel);
 
+Base LoadNetworkBase(char* buffer, uint64_t size, const int samplesPerPixel);
+
 std::shared_ptr<CloudBVH> LoadTreelet(const std::string &path,
                                       const TreeletId treeletId,
                                       std::istream *stream = nullptr);
@@ -79,6 +82,8 @@ std::shared_ptr<CloudBVH> LoadTreelet(const std::string &path,
 std::shared_ptr<CloudBVH> LoadNetworkTreelet(
                                       const TreeletId treeletId,
                                       char* buffer, uint64_t size);
+
+void SerializeBaseToBuffer(std::string camera_filename, std::string lights_filename, std::string sampler_filename, std::string scene_filename, char** buffer, uint64_t* size);
 
 void SerializeTreeletToBuffer(std::string filename, std::vector<std::string>& mat_filenames, char** buffer, uint64_t* size);
 
