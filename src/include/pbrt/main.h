@@ -83,7 +83,8 @@ std::shared_ptr<CloudBVH> LoadNetworkTreelet(
                                       const TreeletId treeletId,
                                       char* buffer, uint64_t size);
 
-void SerializeBaseToBuffer(std::string camera_filename, std::string lights_filename, std::string sampler_filename, std::string scene_filename, char** buffer, uint64_t* size);
+void SerializeBaseToBuffer(std::string camera_filename, std::string lights_filename, std::string sampler_filename,
+                           std::string scene_filename, std::string manifest_filename, char** buffer, uint64_t* size);
 
 void SerializeTreeletToBuffer(std::string filename, std::vector<std::string>& mat_filenames, char** buffer, uint64_t* size);
 

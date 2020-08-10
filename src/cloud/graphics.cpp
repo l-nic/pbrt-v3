@@ -91,7 +91,8 @@ Base LoadNetworkBase(char* buffer, uint64_t size, const int samplesPerPixel) {
     return {buffer, size, samplesPerPixel};
 }
 
-void SerializeBaseToBuffer(string camera_filename, string lights_filename, string sampler_filename, string scene_filename, char** buffer, uint64_t* size) {
+void SerializeBaseToBuffer(string camera_filename, string lights_filename, string sampler_filename,
+                           string scene_filename, string manifest_filename, char** buffer, uint64_t* size) {
 
 }
 
