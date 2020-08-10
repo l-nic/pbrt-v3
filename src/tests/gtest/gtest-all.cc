@@ -7942,7 +7942,7 @@ FilePath FilePath::GetCurrentDir() {
   return FilePath(_getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
 #else
   char cwd[GTEST_PATH_MAX_ + 1] = { '\0' };
-  return FilePath(getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
+  return FilePath("");//getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
 #endif  // GTEST_OS_WINDOWS_MOBILE
 }
 
@@ -8353,8 +8353,8 @@ RE::~RE() {
     // of the regex is undefined. Since the regex's are essentially
     // the same, one cannot be valid (or invalid) without the other
     // being so too.
-    regfree(&partial_regex_);
-    regfree(&full_regex_);
+    //regfree(&partial_regex_);
+    //regfree(&full_regex_);
   }
   free(const_cast<char*>(pattern_));
 }
@@ -8364,7 +8364,7 @@ bool RE::FullMatch(const char* str, const RE& re) {
   if (!re.is_valid_) return false;
 
   regmatch_t match;
-  return regexec(&re.full_regex_, str, 1, &match, 0) == 0;
+  return false;//regexec(&re.full_regex_, str, 1, &match, 0) == 0;
 }
 
 // Returns true iff regular expression re matches a substring of str
@@ -8373,7 +8373,7 @@ bool RE::PartialMatch(const char* str, const RE& re) {
   if (!re.is_valid_) return false;
 
   regmatch_t match;
-  return regexec(&re.partial_regex_, str, 1, &match, 0) == 0;
+  return false;//regexec(&re.partial_regex_, str, 1, &match, 0) == 0;
 }
 
 // Initializes an RE from its string representation.
@@ -8386,7 +8386,7 @@ void RE::Init(const char* regex) {
   char* const full_pattern = new char[full_regex_len];
 
   snprintf(full_pattern, full_regex_len, "^(%s)$", regex);
-  is_valid_ = regcomp(&full_regex_, full_pattern, REG_EXTENDED) == 0;
+  is_valid_ = false;//regcomp(&full_regex_, full_pattern, REG_EXTENDED) == 0;
   // We want to call regcomp(&partial_regex_, ...) even if the
   // previous expression returns false.  Otherwise partial_regex_ may
   // not be properly initialized can may cause trouble when it's
@@ -8397,7 +8397,7 @@ void RE::Init(const char* regex) {
   // regex.  We change it to an equivalent form "()" to be safe.
   if (is_valid_) {
     const char* const partial_regex = (*regex == '\0') ? "()" : regex;
-    is_valid_ = regcomp(&partial_regex_, partial_regex, REG_EXTENDED) == 0;
+    is_valid_ = false;//regcomp(&partial_regex_, partial_regex, REG_EXTENDED) == 0;
   }
   EXPECT_TRUE(is_valid_)
       << "Regular expression \"" << regex
@@ -8723,7 +8723,7 @@ GTestLog::~GTestLog() {
 class CapturedStream {
  public:
   // The ctor redirects the stream to a temporary file.
-  explicit CapturedStream(int fd) : fd_(fd), uncaptured_fd_(dup(fd)) {
+  explicit CapturedStream(int fd) : fd_(fd), uncaptured_fd_(-1)/*dup(fd))*/ {
 # if GTEST_OS_WINDOWS
     char temp_dir_path[MAX_PATH + 1] = { '\0' };  // NOLINT
     char temp_file_path[MAX_PATH + 1] = { '\0' };  // NOLINT

@@ -21,7 +21,7 @@ FileDescriptor::FileDescriptor( const int fd )
 {
   /* set close-on-exec flag so our file descriptors
     aren't passed on to unrelated children (like a shell) */
-  CheckSystemCall( "fcntl FD_CLOEXEC", fcntl( fd_, F_SETFD, FD_CLOEXEC ) );
+  //CheckSystemCall( "fcntl FD_CLOEXEC", fcntl( fd_, F_SETFD, FD_CLOEXEC ) );
 }
 
 /* move constructor */
@@ -54,7 +54,7 @@ void FileDescriptor::close()
     return;
   }
 
-  CheckSystemCall( "close", ::close( fd_ ) );
+  //CheckSystemCall( "close", ::close( fd_ ) );
 
   fd_ = -1;
 }
@@ -62,11 +62,11 @@ void FileDescriptor::close()
 /* destructor tries to close, but catches exception */
 FileDescriptor::~FileDescriptor()
 {
-  try {
-    close();
-  } catch ( const exception & e ) { /* don't throw from destructor */
-    print_exception( "FileDescriptor", e );
-  }
+  // try {
+  //   close();
+  // } catch ( const exception & e ) { /* don't throw from destructor */
+  //   print_exception( "FileDescriptor", e );
+  // }
 }
 
 /* attempt to write a portion of a string */
@@ -77,14 +77,14 @@ string::const_iterator FileDescriptor::write( const string::const_iterator & beg
     throw runtime_error( "nothing to write" );
   }
 
-  ssize_t bytes_written = CheckSystemCall( "write", ::write( fd_, &*begin, end - begin ) );
-  if ( bytes_written == 0 ) {
-    throw runtime_error( "write returned 0" );
-  }
+  // ssize_t bytes_written = CheckSystemCall( "write", ::write( fd_, &*begin, end - begin ) );
+  // if ( bytes_written == 0 ) {
+  //   throw runtime_error( "write returned 0" );
+  // }
 
-  register_write();
+  // register_write();
 
-  return begin + bytes_written;
+  // return begin + bytes_written;
 }
 
 /* read method */
@@ -92,14 +92,14 @@ string FileDescriptor::read( const size_t limit )
 {
   char buffer[ BUFFER_SIZE ];
 
-  ssize_t bytes_read = CheckSystemCall( "read", ::read( fd_, buffer, min( BUFFER_SIZE, limit ) ) );
-  if ( bytes_read == 0 ) {
-    set_eof();
-  }
+  // ssize_t bytes_read = CheckSystemCall( "read", ::read( fd_, buffer, min( BUFFER_SIZE, limit ) ) );
+  // if ( bytes_read == 0 ) {
+  //   set_eof();
+  // }
 
-  register_read();
+  // register_read();
 
-  return string( buffer, bytes_read );
+  // return string( buffer, bytes_read );
 }
 
 /* write method */
@@ -137,7 +137,7 @@ string FileDescriptor::read_exactly( const size_t length,
 
 void FileDescriptor::block_for_exclusive_lock()
 {
-  CheckSystemCall( "flock", flock( fd_num(), LOCK_EX ) );
+  //CheckSystemCall( "flock", flock( fd_num(), LOCK_EX ) );
 }
 
 void FileDescriptor::set_blocking( const bool block )
@@ -150,5 +150,5 @@ void FileDescriptor::set_blocking( const bool block )
     flags = flags | O_NONBLOCK;
   }
 
-  CheckSystemCall( "fcntl F_SETFL", fcntl( fd_, F_SETFL, flags ) );
+  //CheckSystemCall( "fcntl F_SETFL", fcntl( fd_, F_SETFL, flags ) );
 }

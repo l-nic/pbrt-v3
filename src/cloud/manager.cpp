@@ -21,8 +21,8 @@ static_assert(
 
 void SceneManager::init(const string& scenePath) {
     this->scenePath = scenePath;
-    sceneFD.reset(CheckSystemCall(
-        scenePath, open(scenePath.c_str(), O_DIRECTORY | O_CLOEXEC)));
+    // sceneFD.reset(CheckSystemCall(
+    //     scenePath, open(scenePath.c_str(), O_DIRECTORY | O_CLOEXEC)));
 }
 
 unique_ptr<protobuf::RecordReader> SceneManager::GetReader(
@@ -31,9 +31,9 @@ unique_ptr<protobuf::RecordReader> SceneManager::GetReader(
         throw runtime_error("SceneManager is not initialized");
     }
 
-    return make_unique<protobuf::RecordReader>(FileDescriptor(CheckSystemCall(
-        "openat", openat(sceneFD->fd_num(), getFileName(type, id).c_str(),
-                         O_RDONLY, 0))));
+    // return make_unique<protobuf::RecordReader>(FileDescriptor(CheckSystemCall(
+    //     "openat", openat(sceneFD->fd_num(), getFileName(type, id).c_str(),
+    //                      O_RDONLY, 0))));
 }
 
 unique_ptr<protobuf::RecordWriter> SceneManager::GetWriter(
@@ -42,11 +42,11 @@ unique_ptr<protobuf::RecordWriter> SceneManager::GetWriter(
         throw runtime_error("SceneManager is not initialized");
     }
 
-    return make_unique<protobuf::RecordWriter>(FileDescriptor(CheckSystemCall(
-        "openat",
-        openat(sceneFD->fd_num(), getFileName(type, id).c_str(),
-               O_WRONLY | O_CREAT | O_EXCL,
-               S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH))));
+    // return make_unique<protobuf::RecordWriter>(FileDescriptor(CheckSystemCall(
+    //     "openat",
+    //     openat(sceneFD->fd_num(), getFileName(type, id).c_str(),
+    //            O_WRONLY | O_CREAT | O_EXCL,
+    //            S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH))));
 }
 
 string SceneManager::getFileName(const ObjectType type, const uint32_t id) {

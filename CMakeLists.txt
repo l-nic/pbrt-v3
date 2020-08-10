@@ -579,7 +579,7 @@ ADD_SANITIZERS ( pbrt_static_exe )
 
 SET_TARGET_PROPERTIES ( pbrt_static_exe PROPERTIES OUTPUT_NAME pbrt-static )
 TARGET_COMPILE_FEATURES ( pbrt_static_exe PRIVATE ${PBRT_CXX11_FEATURES} )
-TARGET_LINK_LIBRARIES ( pbrt_static_exe ${ALL_PBRT_LIBS} dl z unwind lzma
+TARGET_LINK_LIBRARIES ( pbrt_static_exe ${ALL_PBRT_LIBS} # dl z unwind lzma
                                         -static -Wl,-allow-multiple-definition
                                         -Wl,--whole-archive
                                         -Wl,--no-whole-archive -s )

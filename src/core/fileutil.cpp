@@ -102,9 +102,9 @@ bool IsAbsolutePath(const std::string &filename) {
 
 std::string AbsolutePath(const std::string &filename) {
     char full[PATH_MAX];
-    if (realpath(filename.c_str(), full))
-        return std::string(full);
-    else
+    // if (realpath(filename.c_str(), full))
+    //     return std::string(full);
+    // else
         return filename;
 }
 
@@ -121,14 +121,14 @@ std::string ResolveFilename(const std::string &filename) {
 
 std::string DirectoryContaining(const std::string &filename) {
     char *t = strdup(filename.c_str());
-    std::string result = dirname(t);
+    std::string result;// = dirname(t);
     free(t);
     return result;
 }
 
 std::string BaseFilename(const std::string &filename) {
     char *t = strdup(filename.c_str());
-    std::string result = basename(t);
+    std::string result;// = basename(t);
     free(t);
     return result;
 }
