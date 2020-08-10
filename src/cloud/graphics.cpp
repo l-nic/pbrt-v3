@@ -154,7 +154,59 @@ Base LoadNetworkBase(char* buffer, uint64_t size, const int samplesPerPixel) {
 
 void SerializeBaseToBuffer(string camera_filename, string lights_filename, string sampler_filename,
                            string scene_filename, string manifest_filename, char** buffer, uint64_t* size) {
+    ostringstream raw_data_out;
+    protobuf::RecordReader camera_reader(camera_filename);
+    protobuf::Camera camera;
+    bool success = camera_reader.read(&camera);
+    CHECK_EQ(success, true);
+    string cam_out_str;
+    camera.SerializeToString(&cam_out_str);
+    uint32_t next_size = cam_out_str.length();
+    raw_data_out.write((char*)&next_size, sizeof(uint32_t));
+    camera.SerializeToOstream(&raw_data_out);
 
+    protobuf::RecordReader sampler_reader(sampler_filename);
+    protobuf::Sampler sampler;
+    success = sampler_reader.read(&sampler);
+    CHECK_EQ(success, true);
+    string sam_out_str;
+    sampler.SerializeToString(&sam_out_str);
+    next_size = sam_out_str.length();
+    raw_data_out.write((char*)&next_size, sizeof(uint32_t));
+    sampler.SerializeToOstream(&raw_data_out);
+
+    vector<protobuf::Light> all_lights;
+    protobuf::RecordReader lights_reader(lights_filename);
+    while (!lights_reader.eof()) {
+        protobuf::Light proto_light;
+        success = lights_reader.read(&proto_light);
+        CHECK_EQ(success, true);
+        all_lights.emplace_back(move(proto_light));
+    }
+    uint32_t num_lights = all_lights.size();
+    raw_data_out.write((char*)&num_lights, sizeof(uint32_t));
+    for (const auto& light : all_lights) {
+        string light_out_str;
+        light.SerializeToString(&light_out_str);
+        next_size = light_out_str.length();
+        raw_data_out.write((char*)&next_size, sizeof(uint32_t));
+        light.SerializeToOstream(&raw_data_out);
+    }
+
+    protobuf::RecordReader scene_reader(scene_filename);
+    protobuf::Scene scene;
+    success = scene_reader.read(&scene);
+    CHECK_EQ(success, true);
+    string scene_out_str;
+    scene.SerializeToString(&scene_out_str);
+    next_size = scene_out_str.length();
+    raw_data_out.write((char*)&next_size, sizeof(uint32_t));
+    scene.SerializeToOstream(&raw_data_out);
+
+    string raw_data_str = raw_data_out.str();
+    *buffer = new char[raw_data_str.length()];
+    memcpy(*buffer, raw_data_str.c_str(), raw_data_str.length());
+    *size = raw_data_str.length();
 }
 
 shared_ptr<CloudBVH> LoadTreelet(const string &path, const TreeletId treeletId,

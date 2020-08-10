@@ -146,6 +146,7 @@ set<ObjectKey> SceneManager::getRecursiveDependencies(const ObjectKey& object) {
 }
 
 void SceneManager::loadManifest() {
+    init("../treelets/");
     auto reader = GetReader(ObjectType::Manifest);
     protobuf::Manifest manifest;
     reader->read(&manifest);
@@ -180,9 +181,9 @@ void SceneManager::loadTreeletDependencies() {
 
 const set<ObjectKey>& SceneManager::getTreeletDependencies(
     const ObjectID treeletId) {
-    if (!sceneFD.initialized()) {
-        throw runtime_error("SceneManager is not initialized");
-    }
+    // if (!sceneFD.initialized()) {
+    //     throw runtime_error("SceneManager is not initialized");
+    // }
 
     if (treeletDependencies.empty()) {
         loadTreeletDependencies();
@@ -192,9 +193,9 @@ const set<ObjectKey>& SceneManager::getTreeletDependencies(
 }
 
 size_t SceneManager::treeletCount() {
-    if (!sceneFD.initialized()) {
-        throw runtime_error("SceneManager is not initialized");
-    }
+    // if (!sceneFD.initialized()) {
+    //     throw runtime_error("SceneManager is not initialized");
+    // }
 
     if (dependencies.empty()) {
         loadManifest();
