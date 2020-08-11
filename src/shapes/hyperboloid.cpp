@@ -74,7 +74,7 @@ Bounds3f Hyperboloid::ObjectBound() const {
 bool Hyperboloid::Intersect(const Ray &r, Float *tHit,
                             SurfaceInteraction *isect,
                             bool testAlphaTexture) const {
-    ProfilePhase p(Prof::ShapeIntersect);
+    //ProfilePhase p(Prof::ShapeIntersect);
     Float phi, v;
     Point3f pHit;
     // Transform _Ray_ to object space
@@ -173,7 +173,7 @@ bool Hyperboloid::Intersect(const Ray &r, Float *tHit,
 }
 
 bool Hyperboloid::IntersectP(const Ray &r, bool testAlphaTexture) const {
-    ProfilePhase p(Prof::ShapeIntersectP);
+    //ProfilePhase p(Prof::ShapeIntersectP);
     Float phi, v;
     Point3f pHit;
     // Transform _Ray_ to object space

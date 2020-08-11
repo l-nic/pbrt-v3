@@ -244,6 +244,7 @@ shared_ptr<CloudBVH> LoadNetworkTreelet(const TreeletId treeletId,
                                  char* buffer, uint64_t size) {
     using namespace pbrt::global;
     // manager.init(path);
+    printf("attempting to load network treelet\n");
     shared_ptr<CloudBVH> treelet = make_shared<CloudBVH>(treeletId);
     treelet->LoadNetworkTreelet(treeletId, buffer, size);
     return treelet;

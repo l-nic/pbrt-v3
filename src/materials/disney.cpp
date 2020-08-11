@@ -384,7 +384,7 @@ class DisneyBSSRDF : public SeparableBSSRDF {
 // hit information in order to modulate based on surface normal
 // orientations..
 Spectrum DisneyBSSRDF::S(const SurfaceInteraction &pi, const Vector3f &wi) {
-    ProfilePhase pp(Prof::BSSRDFEvaluation);
+    //ProfilePhase pp(Prof::BSSRDFEvaluation);
     // Fade based on relative orientations of the two surface normals to
     // better handle surface cavities. (Details via personal communication
     // from Brent Burley; these details aren't published in the course
@@ -410,7 +410,7 @@ Spectrum DisneyBSSRDF::S(const SurfaceInteraction &pi, const Vector3f &wi) {
 
 // Diffusion profile from Burley 2015, eq (5).
 Spectrum DisneyBSSRDF::Sr(Float r) const {
-    ProfilePhase pp(Prof::BSSRDFEvaluation);
+    //ProfilePhase pp(Prof::BSSRDFEvaluation);
     if (r < 1e-6f) r = 1e-6f;  // Avoid singularity at r == 0.
     return R * (Exp(-Spectrum(r) / d) + Exp(-Spectrum(r) / (3 * d))) /
            (8 * Pi * d * r);

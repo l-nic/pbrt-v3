@@ -681,6 +681,7 @@ std::shared_ptr<Material> material::from_protobuf(
     std::map<std::string, std::shared_ptr<Texture<Spectrum>>> sTex;
     TextureParams tp = pbrt::from_protobuf(
         material.texture_params(), geom_params, material_params, fTex, sTex);
+    printf("making material\n");
     return pbrt::MakeMaterial(material.name(), tp);
 }
 

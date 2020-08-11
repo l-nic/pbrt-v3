@@ -557,7 +557,7 @@ std::vector<std::shared_ptr<Shape>> MakeShapes(const std::string &name,
     return shapes;
 }
 
-STAT_COUNTER("Scene/Materials created", nMaterialsCreated);
+//STAT_COUNTER("Scene/Materials created", nMaterialsCreated);
 
 std::shared_ptr<Material> MakeMaterial(const std::string &name,
                                        const TextureParams &mp) {
@@ -656,7 +656,7 @@ std::shared_ptr<Material> MakeMaterial(const std::string &name,
 
     mp.ReportUnused();
     if (!material) Error("Unable to create material \"%s\"", name.c_str());
-    else ++nMaterialsCreated;
+    //else ++nMaterialsCreated;
 
     return std::shared_ptr<Material>(material);
 }
@@ -1690,7 +1690,7 @@ void pbrtObjectBegin(const std::string &name) {
         printf("%*sObjectBegin \"%s\"\n", catIndentCount, "", name.c_str());
 }
 
-STAT_COUNTER("Scene/Object instances created", nObjectInstancesCreated);
+// STAT_COUNTER("Scene/Object instances created", nObjectInstancesCreated);
 
 void pbrtObjectEnd() {
     VERIFY_WORLD("ObjectEnd");
@@ -1698,7 +1698,7 @@ void pbrtObjectEnd() {
         Error("ObjectEnd called outside of instance definition");
     renderOptions->currentInstance = nullptr;
     pbrtAttributeEnd();
-    ++nObjectInstancesCreated;
+    //++nObjectInstancesCreated;
     if (PbrtOptions.cat || PbrtOptions.toPly)
         printf("%*sObjectEnd\n", catIndentCount, "");
 }
@@ -1726,7 +1726,7 @@ static std::shared_ptr<Primitive> buildAccelStructure(const std::string &name) {
     return instance_prims[0];
 }
 
-STAT_COUNTER("Scene/Object instances used", nObjectInstancesUsed);
+// STAT_COUNTER("Scene/Object instances used", nObjectInstancesUsed);
 
 void pbrtObjectInstance(const std::string &name) {
     VERIFY_WORLD("ObjectInstance");
@@ -1746,7 +1746,7 @@ void pbrtObjectInstance(const std::string &name) {
     }
     auto instAccel = buildAccelStructure(name);
     if (!instAccel) return;
-    ++nObjectInstancesUsed;
+    //++nObjectInstancesUsed;
 
     static_assert(MaxTransforms == 2,
                   "TransformCache assumes only two transforms");

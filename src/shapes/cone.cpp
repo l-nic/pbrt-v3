@@ -54,7 +54,7 @@ Bounds3f Cone::ObjectBound() const {
 
 bool Cone::Intersect(const Ray &r, Float *tHit, SurfaceInteraction *isect,
                      bool testAlphaTexture) const {
-    ProfilePhase p(Prof::ShapeIntersect);
+    //ProfilePhase p(Prof::ShapeIntersect);
     Float phi;
     Point3f pHit;
     // Transform _Ray_ to object space
@@ -148,7 +148,7 @@ bool Cone::Intersect(const Ray &r, Float *tHit, SurfaceInteraction *isect,
 }
 
 bool Cone::IntersectP(const Ray &r, bool testAlphaTexture) const {
-    ProfilePhase p(Prof::ShapeIntersectP);
+    //ProfilePhase p(Prof::ShapeIntersectP);
     Float phi;
     Point3f pHit;
     // Transform _Ray_ to object space

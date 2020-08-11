@@ -21,11 +21,11 @@ using namespace std;
 
 namespace pbrt {
 
-STAT_COUNTER("BVH/Total Ray Transfers", totalRayTransfers);
+//STAT_COUNTER("BVH/Total Ray Transfers", totalRayTransfers);
 
 CloudBVH::CloudBVH(const uint32_t bvh_root, const bool preload_all)
     : bvh_root_(bvh_root), preload_(preload_all) {
-    ProfilePhase _(Prof::AccelConstruction);
+    //ProfilePhase _(Prof::AccelConstruction);
 
     if (MaxThreadIndex() > 1 && !preload_all) {
         throw runtime_error(
@@ -110,7 +110,7 @@ void CloudBVH::loadTreelet(const uint32_t root_id, istream *stream) const {
         return; /* this tree is already loaded */
     }
 
-    ProfilePhase _(Prof::LoadTreelet);
+    //ProfilePhase _(Prof::LoadTreelet);
 
     TreeletInfo &info = treelet_info_[root_id];
 
@@ -288,7 +288,7 @@ void CloudBVH::loadTreelet(const uint32_t root_id, istream *stream) const {
 // }
 
 void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t size) const {
-    printf("Loading network treelet\n");
+    printf("Loading network treelet in cloud\n");
     for (int j = 0; j < 10; j++) {
       char* current_offset = buffer + j*sizeof(uint32_t);
       printf("%#x\n", *(uint32_t*)current_offset);
@@ -330,6 +330,7 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
 
     // Load in the materials. The treelet will refer to these later, so they need to be loaded first.
     uint32_t num_mats = 0;
+    printf("mats\n");
     memcpy(&num_mats, buf_now, sizeof(uint32_t));
     buf_now += sizeof(uint32_t);
     for (int i = 0; i < num_mats; i++) {
@@ -350,8 +351,11 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
         bool success = mat.ParseFromArray(buf_now, next_size);
         CHECK_EQ(success, true);
         buf_now += next_size;
+        printf("protobuf entry\n");
         materials_[mat_id] = move(material::from_protobuf(mat));
+        printf("protobuf exit\n");
     }
+    printf("meshes\n");
 
     /* read in the triangle meshes for this treelet first */
     uint32_t num_triangle_meshes = 0;
@@ -668,7 +672,7 @@ bool CloudBVH::Intersect(RayState &rayState, SurfaceInteraction *isect) const {
 }
 
 bool CloudBVH::Intersect(const Ray &ray, SurfaceInteraction *isect) const {
-    ProfilePhase _(Prof::AccelIntersect);
+    //ProfilePhase _(Prof::AccelIntersect);
 
     bool hit = false;
     Vector3f invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
@@ -682,7 +686,7 @@ bool CloudBVH::Intersect(const Ray &ray, SurfaceInteraction *isect) const {
     if (bvh_root_ == 0) {
         startTreelet = ComputeIdx(ray.d);
     } else {
-        totalRayTransfers++;
+        //totalRayTransfers++;
     }
 
     pair<uint32_t, uint32_t> current(startTreelet, 0);
@@ -714,7 +718,7 @@ bool CloudBVH::Intersect(const Ray &ray, SurfaceInteraction *isect) const {
                                          node.primitive_count - 1) {
                                 instanceReturn = true;
                             }
-                            totalRayTransfers++;
+                            //totalRayTransfers++;
                         }
                     }
                 }
@@ -742,7 +746,7 @@ bool CloudBVH::Intersect(const Ray &ray, SurfaceInteraction *isect) const {
         }
 
         if (current.first != prevTreelet && !instanceReturn) {
-            totalRayTransfers++;
+            //totalRayTransfers++;
         }
         prevTreelet = current.first;
     }
@@ -751,7 +755,7 @@ bool CloudBVH::Intersect(const Ray &ray, SurfaceInteraction *isect) const {
 }
 
 bool CloudBVH::IntersectP(const Ray &ray) const {
-    ProfilePhase _(Prof::AccelIntersectP);
+    //ProfilePhase _(Prof::AccelIntersectP);
 
     Vector3f invDir(1.f / ray.d.x, 1.f / ray.d.y, 1.f / ray.d.z);
     int dirIsNeg[3] = {invDir.x < 0, invDir.y < 0, invDir.z < 0};
@@ -764,7 +768,7 @@ bool CloudBVH::IntersectP(const Ray &ray) const {
     if (bvh_root_ == 0) {
         startTreelet = ComputeIdx(ray.d);
     } else {
-        totalRayTransfers++;
+        //totalRayTransfers++;
     }
 
     pair<uint32_t, uint32_t> current(startTreelet, 0);
@@ -796,7 +800,7 @@ bool CloudBVH::IntersectP(const Ray &ray) const {
                                          node.primitive_count - 1) {
                                 instanceReturn = true;
                             }
-                            totalRayTransfers++;
+                            //totalRayTransfers++;
                         }
                     }
                 }
@@ -824,7 +828,7 @@ bool CloudBVH::IntersectP(const Ray &ray) const {
         }
 
         if (current.first != prevTreelet && !instanceReturn) {
-            totalRayTransfers++;
+            //totalRayTransfers++;
         }
         prevTreelet = current.first;
     }

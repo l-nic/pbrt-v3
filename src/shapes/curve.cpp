@@ -38,11 +38,11 @@
 
 namespace pbrt {
 
-STAT_MEMORY_COUNTER("Memory/Curves", curveBytes);
-STAT_PERCENT("Intersections/Ray-curve intersection tests", nHits, nTests);
-STAT_INT_DISTRIBUTION("Intersections/Curve refinement level", refinementLevel);
-STAT_COUNTER("Scene/Curves", nCurves);
-STAT_COUNTER("Scene/Split curves", nSplitCurves);
+// STAT_MEMORY_COUNTER("Memory/Curves", curveBytes);
+// STAT_PERCENT("Intersections/Ray-curve intersection tests", nHits, nTests);
+// STAT_INT_DISTRIBUTION("Intersections/Curve refinement level", refinementLevel);
+// STAT_COUNTER("Scene/Curves", nCurves);
+// STAT_COUNTER("Scene/Split curves", nSplitCurves);
 
 // Curve Utility Functions
 static Point3f BlossomBezier(const Point3f p[4], Float u0, Float u1, Float u2) {
@@ -97,7 +97,7 @@ CurveCommon::CurveCommon(const Point3f c[4], Float width0, Float width1,
         normalAngle = std::acos(Clamp(Dot(n[0], n[1]), 0, 1));
         invSinNormalAngle = 1 / std::sin(normalAngle);
     }
-    ++nCurves;
+    //++nCurves;
 }
 
 std::vector<std::shared_ptr<Shape>> CreateCurve(
@@ -114,9 +114,9 @@ std::vector<std::shared_ptr<Shape>> CreateCurve(
         Float uMax = (i + 1) / (Float)nSegments;
         segments.push_back(std::make_shared<Curve>(o2w, w2o, reverseOrientation,
                                                    common, uMin, uMax));
-        ++nSplitCurves;
+        //++nSplitCurves;
     }
-    curveBytes += sizeof(CurveCommon) + nSegments * sizeof(Curve);
+    //curveBytes += sizeof(CurveCommon) + nSegments * sizeof(Curve);
     return segments;
 }
 
@@ -136,8 +136,8 @@ Bounds3f Curve::ObjectBound() const {
 
 bool Curve::Intersect(const Ray &r, Float *tHit, SurfaceInteraction *isect,
                       bool testAlphaTexture) const {
-    ProfilePhase p(isect ? Prof::CurveIntersect : Prof::CurveIntersectP);
-    ++nTests;
+    //ProfilePhase p(isect ? Prof::CurveIntersect : Prof::CurveIntersectP);
+    //++nTests;
     // Transform _Ray_ to object space
     Vector3f oErr, dErr;
     Ray ray = (*WorldToObject)(r, &oErr, &dErr);
@@ -223,7 +223,7 @@ bool Curve::Intersect(const Ray &r, Float *tHit, SurfaceInteraction *isect,
     // Compute log base 4 by dividing log2 in half.
     int r0 = Log2(1.41421356237f * 6.f * L0 / (8.f * eps)) / 2;
     int maxDepth = Clamp(r0, 0, 10);
-    ReportValue(refinementLevel, maxDepth);
+    //ReportValue(refinementLevel, maxDepth);
 
     return recursiveIntersect(ray, tHit, isect, cp, Inverse(objectToRay), uMin,
                               uMax, maxDepth);
@@ -368,7 +368,7 @@ bool Curve::recursiveIntersect(const Ray &ray, Float *tHit,
                 ray(pc.z), pError, Point2f(u, v), -ray.d, dpdu, dpdv,
                 Normal3f(0, 0, 0), Normal3f(0, 0, 0), ray.time, this));
         }
-        ++nHits;
+        //++nHits;
         return true;
     }
 }

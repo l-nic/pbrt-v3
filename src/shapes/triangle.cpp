@@ -42,7 +42,7 @@
 
 namespace pbrt {
 
-STAT_PERCENT("Intersections/Ray-triangle intersection tests", nHits, nTests);
+//STAT_PERCENT("Intersections/Ray-triangle intersection tests", nHits, nTests);
 
 // Triangle Local Definitions
 static void PlyErrorCallback(p_ply, const char *message) {
@@ -50,7 +50,7 @@ static void PlyErrorCallback(p_ply, const char *message) {
 }
 
 // Triangle Method Definitions
-STAT_RATIO("Scene/Triangles per triangle mesh", nTris, nMeshes);
+//STAT_RATIO("Scene/Triangles per triangle mesh", nTris, nMeshes);
 TriangleMesh::TriangleMesh(
     const Transform &ObjectToWorld, int nTriangles, const int *vertexIndices,
     int nVertices, const Point3f *P, const Vector3f *S, const Normal3f *N,
@@ -62,12 +62,12 @@ TriangleMesh::TriangleMesh(
       vertexIndices(vertexIndices, vertexIndices + 3 * nTriangles),
       alphaMask(alphaMask),
       shadowAlphaMask(shadowAlphaMask) {
-    ++nMeshes;
-    nTris += nTriangles;
-    triMeshBytes += sizeof(*this) + this->vertexIndices.size() * sizeof(int) +
-                    nVertices * (sizeof(*P) + (N ? sizeof(*N) : 0) +
-                                 (S ? sizeof(*S) : 0) + (UV ? sizeof(*UV) : 0) +
-                                 (fIndices ? sizeof(*fIndices) : 0));
+    //++nMeshes;
+    //nTris += nTriangles;
+    // triMeshBytes += sizeof(*this) + this->vertexIndices.size() * sizeof(int) +
+    //                 nVertices * (sizeof(*P) + (N ? sizeof(*N) : 0) +
+    //                              (S ? sizeof(*S) : 0) + (UV ? sizeof(*UV) : 0) +
+    //                              (fIndices ? sizeof(*fIndices) : 0));
 
     // Transform mesh vertices to world space
     p.reset(new Point3f[nVertices]);
@@ -187,8 +187,8 @@ Bounds3f Triangle::WorldBound() const {
 
 bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
                          bool testAlphaTexture) const {
-    ProfilePhase p(Prof::TriIntersect);
-    ++nTests;
+    //ProfilePhase p(Prof::TriIntersect);
+    //++nTests;
     // Get triangle vertices in _p0_, _p1_, and _p2_
     const Point3f &p0 = mesh->p[v[0]];
     const Point3f &p1 = mesh->p[v[1]];
@@ -420,13 +420,13 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     else if (reverseOrientation ^ transformSwapsHandedness)
         isect->n = isect->shading.n = -isect->n;
     *tHit = t;
-    ++nHits;
+    //++nHits;
     return true;
 }
 
 bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const {
-    ProfilePhase p(Prof::TriIntersectP);
-    ++nTests;
+    //ProfilePhase p(Prof::TriIntersectP);
+    //++nTests;
     // Get triangle vertices in _p0_, _p1_, and _p2_
     const Point3f &p0 = mesh->p[v[0]];
     const Point3f &p1 = mesh->p[v[1]];
@@ -568,7 +568,7 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const {
             mesh->shadowAlphaMask->Evaluate(isectLocal) == 0)
             return false;
     }
-    ++nHits;
+    //++nHits;
     return true;
 }
 
