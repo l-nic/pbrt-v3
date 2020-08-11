@@ -43,8 +43,8 @@
 
 namespace pbrt {
 
-STAT_PERCENT("Integrator/Zero-radiance paths", zeroRadiancePaths, totalPaths);
-STAT_INT_DISTRIBUTION("Integrator/Path length", pathLength);
+//STAT_PERCENT("Integrator/Zero-radiance paths", zeroRadiancePaths, totalPaths);
+//STAT_INT_DISTRIBUTION("Integrator/Path length", pathLength);
 
 // BDPT Forward Declarations
 int RandomWalk(const Scene &scene, RayDifferential ray, Sampler &sampler,
@@ -71,7 +71,7 @@ int GenerateCameraSubpath(const Scene &scene, Sampler &sampler,
                           const Camera &camera, const Point2f &pFilm,
                           Vertex *path) {
     if (maxDepth == 0) return 0;
-    ProfilePhase _(Prof::BDPTGenerateSubpath);
+    //ProfilePhase _(Prof::BDPTGenerateSubpath);
     // Sample initial ray for camera subpath
     CameraSample cameraSample;
     cameraSample.pFilm = pFilm;
@@ -98,7 +98,7 @@ int GenerateLightSubpath(
     const std::unordered_map<const Light *, size_t> &lightToIndex,
     Vertex *path) {
     if (maxDepth == 0) return 0;
-    ProfilePhase _(Prof::BDPTGenerateSubpath);
+    //ProfilePhase _(Prof::BDPTGenerateSubpath);
     // Sample initial ray for light subpath
     Float lightPdf;
     int lightNum = lightDistr.SampleDiscrete(sampler.Get1D(), &lightPdf);
@@ -447,7 +447,7 @@ Spectrum ConnectBDPT(
     const std::unordered_map<const Light *, size_t> &lightToIndex,
     const Camera &camera, Sampler &sampler, Point2f *pRaster,
     Float *misWeightPtr) {
-    ProfilePhase _(Prof::BDPTConnectSubpaths);
+    //ProfilePhase _(Prof::BDPTConnectSubpaths);
     Spectrum L(0.f);
     // Ignore invalid connections related to infinite area lights
     if (t > 1 && s != 0 && cameraVertices[t - 1].type == VertexType::Light)
@@ -518,9 +518,9 @@ Spectrum ConnectBDPT(
         }
     }
 
-    ++totalPaths;
-    if (L.IsBlack()) ++zeroRadiancePaths;
-    ReportValue(pathLength, s + t - 2);
+    //++totalPaths;
+    //if (L.IsBlack()) ++zeroRadiancePaths;
+    //ReportValue(pathLength, s + t - 2);
 
     // Compute MIS weight for connection strategy
     Float misWeight =

@@ -47,7 +47,7 @@
 
 namespace pbrt {
 
-STAT_PERCENT("Integrator/Acceptance rate", acceptedMutations, totalMutations);
+//STAT_PERCENT("Integrator/Acceptance rate", acceptedMutations, totalMutations);
 
 // MLTSampler Constants
 static const int cameraStreamIndex = 0;
@@ -248,10 +248,10 @@ void MLTIntegrator::Render(const Scene &scene) {
                     pCurrent = pProposed;
                     LCurrent = LProposed;
                     sampler.Accept();
-                    ++acceptedMutations;
+                    //++acceptedMutations;
                 } else
                     sampler.Reject();
-                ++totalMutations;
+                //++totalMutations;
                 if ((i * nTotalMutations / nChains + j) % progressFrequency ==
                     0)
                     progress.Update();

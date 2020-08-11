@@ -13,19 +13,19 @@ using namespace std;
 
 namespace pbrt {
 
-STAT_COUNTER("Integrator/Camera rays generated", nCameraRays);
-STAT_COUNTER("Intersections/Regular ray intersection tests",
-             nIntersectionTests);
-STAT_COUNTER("Intersections/Shadow ray intersection tests", nShadowTests);
-STAT_COUNTER("Integrator/Total rays traced", totalRays);
-STAT_INT_DISTRIBUTION("Integrator/Unused bounces per path", nRemainingBounces);
+//STAT_COUNTER("Integrator/Camera rays generated", nCameraRays);
+//STAT_COUNTER("Intersections/Regular ray intersection tests",
+//             nIntersectionTests);
+//STAT_COUNTER("Intersections/Shadow ray intersection tests", nShadowTests);
+//STAT_COUNTER("Integrator/Total rays traced", totalRays);
+//STAT_INT_DISTRIBUTION("Integrator/Unused bounces per path", nRemainingBounces);
 
 RayStatePtr CloudIntegrator::Trace(RayStatePtr &&rayState,
                                    const CloudBVH &treelet) {
     treelet.Trace(*rayState);
 
     if (!rayState->isShadowRay && rayState->toVisitEmpty() && !rayState->hit) {
-        ReportValue(nRemainingBounces, rayState->remainingBounces);
+        //ReportValue(nRemainingBounces, rayState->remainingBounces);
     }
 
     return move(rayState);
@@ -75,7 +75,7 @@ pair<RayStatePtr, RayStatePtr> CloudIntegrator::Shade(
         VisibilityTester visibility;
         Spectrum Li = light->Sample_Li(it, uLight, &wi, &lightPdf, &visibility);
 
-        ++totalRays;
+        //++totalRays;
 
         if (lightPdf > 0 && !Li.IsBlack()) {
             Spectrum f;
@@ -97,7 +97,7 @@ pair<RayStatePtr, RayStatePtr> CloudIntegrator::Shade(
                 shadowRay.isShadowRay = true;
                 shadowRay.StartTrace();
 
-                ++nShadowTests;
+                //++nShadowTests;
             }
         }
     }
@@ -139,15 +139,15 @@ pair<RayStatePtr, RayStatePtr> CloudIntegrator::Shade(
 
     if (bouncePtr) {
         bouncePtr->sample.dim = sampler->GetCurrentDimension();
-        ++nIntersectionTests;
-        ++totalRays;
+        //++nIntersectionTests;
+        //++totalRays;
     } else if (shadowRayPtr) {
         /* if bounce isn't produced, this is the last ray in the path */
         shadowRayPtr->remainingBounces = 0;
     }
 
     if (bouncePtr == nullptr) {
-        ReportValue(nRemainingBounces, rayState.remainingBounces);
+        //ReportValue(nRemainingBounces, rayState.remainingBounces);
     }
 
     return {move(bouncePtr), move(shadowRayPtr)};
@@ -197,8 +197,8 @@ void CloudIntegrator::Render(const Scene &scene) {
 
             rayQueue.push_back(move(statePtr));
 
-            ++nIntersectionTests;
-            ++nCameraRays;
+            //++nIntersectionTests;
+            //++nCameraRays;
         } while (sampler->StartNextSample());
     }
 
