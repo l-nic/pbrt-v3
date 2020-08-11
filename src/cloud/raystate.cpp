@@ -228,6 +228,7 @@ size_t PackRay(char *bufferStart, const RayState &state) {
 }
 
 void UnPackRay(char *buffer, RayState &state) {
+    printf("entering unpack\n");
     PackedRayFixedHdr *hdr = reinterpret_cast<PackedRayFixedHdr *>(buffer);
     state.trackRay = hdr->trackRay;
     state.hop = hdr->hop;
@@ -298,9 +299,9 @@ const size_t RayState::MaxPackedSize =
     2 * sizeof(PackedTransform) + 4;
 
 size_t RayState::Serialize(char *data) {
-    static thread_local char packedBuffer[RayState::MaxPackedSize];
+    //static thread_local char packedBuffer[RayState::MaxPackedSize];
 
-    size_t packedBytes = PackRay(packedBuffer, *this);
+    size_t packedBytes = PackRay(data + 4, *this);
 
     //const size_t upperBound = LZ4_COMPRESSBOUND(RayState::MaxPackedSize);
     uint32_t len = packedBytes;
@@ -313,7 +314,7 @@ size_t RayState::Serialize(char *data) {
     //         throw runtime_error("ray compression failed");
     //     }
     // } else {
-        memcpy(data + 4, packedBuffer, packedBytes);
+      //  memcpy(data + 4, packedBuffer, packedBytes);
     //}
 
     memcpy(data, &len, 4);
@@ -323,7 +324,7 @@ size_t RayState::Serialize(char *data) {
 }
 
 void RayState::Deserialize(const char *data, const size_t len) {
-    static thread_local char packedBuffer[RayState::MaxPackedSize];
+    //static thread_local char packedBuffer[RayState::MaxPackedSize];
 
     // if (PbrtOptions.compressRays) {
     //     if (LZ4_decompress_safe(data, packedBuffer, len,
@@ -331,10 +332,11 @@ void RayState::Deserialize(const char *data, const size_t len) {
     //         throw runtime_error("ray decompression failed");
     //     }
     // } else {
-        memcpy(packedBuffer, data, min(RayState::MaxPackedSize, len));
+        printf("within deserialize\n");
+        //memcpy(packedBuffer, data, min(RayState::MaxPackedSize, len));
     //}
-
-    UnPackRay(packedBuffer, *this);
+    printf("starting unpack\n");
+    UnPackRay((char*)data, *this);
 }
 
 size_t RayState::MaxSize() const {
@@ -419,9 +421,9 @@ void UnPackSample(char *buffer, Sample &sample) {
 }
 
 size_t Sample::Serialize(char *data) {
-    static thread_local char packedBuffer[sizeof(PackedSample)];
+    //static thread_local char packedBuffer[sizeof(PackedSample)];
 
-    const size_t size = PackSample(packedBuffer, *this);
+    const size_t size = PackSample(data + 4, *this);
     //const size_t upperBound = LZ4_COMPRESSBOUND(size);
     uint32_t len = size;
 
@@ -432,7 +434,7 @@ size_t Sample::Serialize(char *data) {
     //         throw runtime_error("finished ray compression failed");
     //     }
     // } else {
-        memcpy(data + 4, packedBuffer, size);
+     //   memcpy(data + 4, packedBuffer, size);
     //}
 
     memcpy(data, &len, 4);
@@ -442,15 +444,15 @@ size_t Sample::Serialize(char *data) {
 }
 
 void Sample::Deserialize(const char *data, const size_t len) {
-    static thread_local char packedBuffer[sizeof(PackedSample)];
+   // static thread_local char packedBuffer[sizeof(PackedSample)];
 
     // if (PbrtOptions.compressRays) {
     //     if (LZ4_decompress_safe(data, packedBuffer, len, sizeof(Sample)) < 0) {
     //         throw runtime_error("ray decompression failed");
     //     }
     // } else {
-        memcpy(packedBuffer, data, min(sizeof(Sample), len));
+     //   memcpy(packedBuffer, data, min(sizeof(Sample), len));
     //}
 
-    UnPackSample(packedBuffer, *this);
+    UnPackSample((char*)data, *this);
 }
