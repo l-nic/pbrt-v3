@@ -44,12 +44,12 @@ DistantLight::DistantLight(const Transform &LightToWorld, const Spectrum &L,
                            const Vector3f &wLight)
     : Light((int)LightFlags::DeltaDirection, LightToWorld, MediumInterface()),
       L(L),
-      wLight(Normalize(LightToWorld(wLight))) {}
+      wLight(Normalize(LightToWorld(wLight))) {printf("distant light init\n");}
 
 Spectrum DistantLight::Sample_Li(const Interaction &ref, const Point2f &u,
                                  Vector3f *wi, Float *pdf,
                                  VisibilityTester *vis) const {
-    ProfilePhase _(Prof::LightSample);
+    //ProfilePhase _(Prof::LightSample);
     *wi = wLight;
     *pdf = 1;
     Point3f pOutside = ref.p + wLight * (2 * worldRadius);
@@ -69,7 +69,7 @@ Float DistantLight::Pdf_Li(const Interaction &, const Vector3f &) const {
 Spectrum DistantLight::Sample_Le(const Point2f &u1, const Point2f &u2,
                                  Float time, Ray *ray, Normal3f *nLight,
                                  Float *pdfPos, Float *pdfDir) const {
-    ProfilePhase _(Prof::LightSample);
+    //ProfilePhase _(Prof::LightSample);
     // Choose point on disk oriented toward infinite light direction
     Vector3f v1, v2;
     CoordinateSystem(wLight, &v1, &v2);
@@ -86,7 +86,7 @@ Spectrum DistantLight::Sample_Le(const Point2f &u1, const Point2f &u2,
 
 void DistantLight::Pdf_Le(const Ray &, const Normal3f &, Float *pdfPos,
                           Float *pdfDir) const {
-    ProfilePhase _(Prof::LightPdf);
+    //ProfilePhase _(Prof::LightPdf);
     *pdfPos = 1 / (Pi * worldRadius * worldRadius);
     *pdfDir = 0;
 }
@@ -98,6 +98,7 @@ std::shared_ptr<DistantLight> CreateDistantLight(const Transform &light2world,
     Point3f from = paramSet.FindOnePoint3f("from", Point3f(0, 0, 0));
     Point3f to = paramSet.FindOnePoint3f("to", Point3f(0, 0, 1));
     Vector3f dir = from - to;
+    printf("creating distant\n");
     return std::make_shared<DistantLight>(light2world, L * sc, dir);
 }
 

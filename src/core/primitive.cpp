@@ -39,7 +39,7 @@
 
 namespace pbrt {
 
-STAT_MEMORY_COUNTER("Memory/Primitives", primitiveMemory);
+//STAT_MEMORY_COUNTER("Memory/Primitives", primitiveMemory);
 
 // Primitive Method Definitions
 Primitive::~Primitive() {}
@@ -70,7 +70,7 @@ void Aggregate::ComputeScatteringFunctions(SurfaceInteraction *isect,
 TransformedPrimitive::TransformedPrimitive(std::shared_ptr<Primitive> &primitive,
                                            const AnimatedTransform &PrimitiveToWorld)
     : primitive(primitive), PrimitiveToWorld(PrimitiveToWorld) {
-    primitiveMemory += sizeof(*this);
+    //primitiveMemory += sizeof(*this);
 }
 
 bool TransformedPrimitive::Intersect(const Ray &r,
@@ -104,7 +104,7 @@ GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape,
     material(material),
     areaLight(areaLight),
     mediumInterface(mediumInterface) {
-    primitiveMemory += sizeof(*this);
+    //primitiveMemory += sizeof(*this);
 }
 
 Bounds3f GeometricPrimitive::WorldBound() const { return shape->WorldBound(); }
@@ -140,7 +140,7 @@ const Material *GeometricPrimitive::GetMaterial() const {
 void GeometricPrimitive::ComputeScatteringFunctions(
     SurfaceInteraction *isect, MemoryArena &arena, TransportMode mode,
     bool allowMultipleLobes) const {
-    ProfilePhase p(Prof::ComputeScatteringFuncs);
+    //ProfilePhase p(Prof::ComputeScatteringFuncs);
     if (material)
         material->ComputeScatteringFunctions(isect, arena, mode,
                                              allowMultipleLobes);

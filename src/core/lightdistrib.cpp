@@ -85,9 +85,9 @@ const Distribution1D *PowerLightDistribution::Lookup(const Point3f &p) const {
 ///////////////////////////////////////////////////////////////////////////
 // SpatialLightDistribution
 
-STAT_COUNTER("SpatialLightDistribution/Distributions created", nCreated);
-STAT_RATIO("SpatialLightDistribution/Lookups per distribution", nLookups, nDistributions);
-STAT_INT_DISTRIBUTION("SpatialLightDistribution/Hash probes per lookup", nProbesPerLookup);
+// STAT_COUNTER("SpatialLightDistribution/Distributions created", nCreated);
+// STAT_RATIO("SpatialLightDistribution/Lookups per distribution", nLookups, nDistributions);
+// STAT_INT_DISTRIBUTION("SpatialLightDistribution/Hash probes per lookup", nProbesPerLookup);
 
 // Voxel coordinates are packed into a uint64_t for hash table lookups;
 // 10 bits are allocated to each coordinate.  invalidPackedPos is an impossible
@@ -134,8 +134,8 @@ SpatialLightDistribution::~SpatialLightDistribution() {
 }
 
 const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const {
-    ProfilePhase _(Prof::LightDistribLookup);
-    ++nLookups;
+    //ProfilePhase _(Prof::LightDistribLookup);
+    //++nLookups;
 
     // First, compute integer voxel coordinates for the given point |p|
     // with respect to the overall voxel grid.
@@ -188,7 +188,7 @@ const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const {
                 // the sampling distribution is ready.  We assume that this
                 // is a rare case, so don't do anything more sophisticated
                 // than spinning.
-                ProfilePhase _(Prof::LightDistribSpinWait);
+                //ProfilePhase _(Prof::LightDistribSpinWait);
                 while ((dist = entry.distribution.load(std::memory_order_acquire)) ==
                        nullptr)
                     // spin :-(. If we were fancy, we'd have any threads
@@ -197,7 +197,7 @@ const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const {
                     ;
             }
             // We have a valid sampling distribution.
-            ReportValue(nProbesPerLookup, nProbes);
+            //ReportValue(nProbesPerLookup, nProbes);
             return dist;
         } else if (entryPackedPos != invalidPackedPos) {
             // The hash table entry we're checking has already been
@@ -223,7 +223,7 @@ const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const {
                 // written.
                 Distribution1D *dist = ComputeDistribution(pi);
                 entry.distribution.store(dist, std::memory_order_release);
-                ReportValue(nProbesPerLookup, nProbes);
+                //ReportValue(nProbesPerLookup, nProbes);
                 return dist;
             }
         }
@@ -232,9 +232,9 @@ const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const {
 
 Distribution1D *
 SpatialLightDistribution::ComputeDistribution(Point3i pi) const {
-    ProfilePhase _(Prof::LightDistribCreation);
-    ++nCreated;
-    ++nDistributions;
+    //ProfilePhase _(Prof::LightDistribCreation);
+    //++nCreated;
+    //++nDistributions;
 
     // Compute the world-space bounding box of the voxel corresponding to
     // |pi|.

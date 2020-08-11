@@ -296,7 +296,7 @@ Bounds3f from_protobuf(const protobuf::Bounds3f& bounds) {
 }
 
 Matrix4x4 from_protobuf(const protobuf::Matrix& proto_matrix) {
-    ProfilePhase _(Prof::ConvertFromProtobuf);
+    // ProfilePhase _(Prof::ConvertFromProtobuf);
 
     Matrix4x4 matrix;
     for (size_t i = 0; i < 4; i++) {
@@ -312,7 +312,7 @@ RGBSpectrum from_protobuf(const protobuf::RGBSpectrum& proto_spectrum) {
 }
 
 TriangleMesh from_protobuf(const protobuf::TriangleMesh& proto_tm) {
-    ProfilePhase _(Prof::ConvertFromProtobuf);
+    // ProfilePhase _(Prof::ConvertFromProtobuf);
 
     Transform identity;
     vector<int> vertexIndices;
@@ -365,9 +365,13 @@ CloudIntegrator::SampleData from_protobuf(const protobuf::SampleData& proto_s) {
 }
 
 ParamSet from_protobuf(const protobuf::ParamSet& pp) {
-    ProfilePhase _(Prof::ConvertFromProtobuf);
+    printf("param set conversion\n");
+    //ProfilePhase _(Prof::ConvertFromProtobuf);
 
+    //printf("created phas")
     ParamSet ps;
+
+    printf("adding entries\n");
 
     for (const auto& item : pp.bools()) {
         ps.AddBool(item.name(), p2v<bool>(item), item.values_size());
@@ -437,7 +441,7 @@ TextureParams from_protobuf(
     ParamSet& material_params,
     std::map<std::string, std::shared_ptr<Texture<Float>>>& fTex,
     std::map<std::string, std::shared_ptr<Texture<Spectrum>>>& sTex) {
-    ProfilePhase _(Prof::ConvertFromProtobuf);
+    // ProfilePhase _(Prof::ConvertFromProtobuf);
 
     for (auto& kv : texture_params.float_textures()) {
         auto texture_reader =
@@ -476,10 +480,13 @@ protobuf::Light light::to_protobuf(const string& name, const ParamSet& params,
 shared_ptr<Light> light::from_protobuf(const protobuf::Light& proto_light) {
     shared_ptr<Light> light;
 
+    printf("lights 1\n");
     const string& name = proto_light.name();
     const Transform light2world =
         pbrt::from_protobuf(proto_light.light_to_world());
     const ParamSet paramSet = pbrt::from_protobuf(proto_light.paramset());
+    printf("lights 2\n");
+    printf("%s\n", name.c_str());
 
     if (name == "point") {
         light = CreatePointLight(light2world, nullptr, paramSet);
@@ -496,6 +503,7 @@ shared_ptr<Light> light::from_protobuf(const protobuf::Light& proto_light) {
     } else {
         throw runtime_error("unknown light name");
     }
+    printf("lights 3\n");
 
     return light;
 }
@@ -513,16 +521,21 @@ protobuf::Sampler sampler::to_protobuf(const string& name,
 shared_ptr<GlobalSampler> sampler::from_protobuf(const protobuf::Sampler& ps,
                                                  const int samplesPerPixel) {
     GlobalSampler* sampler;
+    printf("sampler 1\n");
 
     const string& name = ps.name();
     const Bounds2i sampleBounds = pbrt::from_protobuf(ps.sample_bounds());
     ParamSet paramSet = pbrt::from_protobuf(ps.paramset());
+
+    printf("sampler 2\n");
 
     if (samplesPerPixel > 0) {
         unique_ptr<int[]> pixelSamples = make_unique<int[]>(1);
         pixelSamples[0] = samplesPerPixel;
         paramSet.AddInt("pixelsamples", move(pixelSamples), 1);
     }
+
+    printf("sampler 3\n");
 
     if (name == "lowdiscrepancy" || name == "02sequence") {
         // sampler = CreateZeroTwoSequenceSampler(paramSet);
@@ -543,6 +556,7 @@ shared_ptr<GlobalSampler> sampler::from_protobuf(const protobuf::Sampler& ps,
     } else {
         throw runtime_error("unknown sampler name");
     }
+    printf("sampler 4\n");
 
     return shared_ptr<GlobalSampler>(sampler);
 }
@@ -581,10 +595,11 @@ shared_ptr<Camera> camera::from_protobuf(
     /* (1) create the filter */
     Filter* filterPtr = nullptr;
 
+    printf("camera from protobuf\n");
     const auto& proto_filter = proto_camera.film().filter();
     const auto& filter_name = proto_filter.name();
     const auto filter_paramset = pbrt::from_protobuf(proto_filter.paramset());
-
+    printf("1\n");
     if (filter_name == "box") {
         filterPtr = CreateBoxFilter(filter_paramset);
     } else if (filter_name == "gaussian") {
@@ -598,6 +613,7 @@ shared_ptr<Camera> camera::from_protobuf(
     } else {
         throw runtime_error("unknown filter name: " + filter_name);
     }
+    printf("2\n");
 
     auto filter = unique_ptr<Filter>(filterPtr);
 
@@ -608,11 +624,16 @@ shared_ptr<Camera> camera::from_protobuf(
     const auto& film_name = proto_film.name();
     const auto film_paramset = pbrt::from_protobuf(proto_film.paramset());
 
+    printf("2.1\n");
+
     if (film_name == "image") {
         film = CreateFilm(film_paramset, move(filter));
     } else {
+        printf("no film name\n");
         throw runtime_error("unknown film name");
     }
+
+    printf("3\n");
 
     /* (3) create the camera */
     Camera* camera = nullptr;
@@ -633,6 +654,8 @@ shared_ptr<Camera> camera::from_protobuf(
 
     AnimatedTransform ac2w(cam2world[0], transform.start_time(), cam2world[1],
                            transform.end_time());
+    printf("4\n");
+    printf("%s\n", name);
 
     if (name == "perspective") {
         camera = CreatePerspectiveCamera(paramset, ac2w, film, mi.outside);
@@ -646,6 +669,7 @@ shared_ptr<Camera> camera::from_protobuf(
         throw runtime_error("unknown camera name");
     }
 
+    printf("5\n");
     return shared_ptr<Camera>(camera);
 }
 

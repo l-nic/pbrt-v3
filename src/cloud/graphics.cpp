@@ -87,6 +87,7 @@ Base LoadBase(const std::string &path, const int samplesPerPixel) {
 }
 
 Base::Base(char* buffer, uint64_t size, const int samplesPerPixel) {
+    printf("In graphics loading base\n");
     using namespace pbrt::global;
 
     PbrtOptions.nThreads = 1;
@@ -95,12 +96,15 @@ Base::Base(char* buffer, uint64_t size, const int samplesPerPixel) {
     char* buf_now = buffer;
     uint32_t next_size = 0;
     memcpy(&next_size, buf_now, sizeof(uint32_t));
+    printf("finished first memory read\n");
     buf_now += sizeof(uint32_t);
     protobuf::Camera proto_camera;
     bool success = proto_camera.ParseFromArray(buf_now, next_size);
     CHECK_EQ(success, true);
     buf_now += next_size;
+    printf("parsed raw protobuf\n");
     camera = camera::from_protobuf(proto_camera, transformCache);
+    printf("ran from protobuf\n");
 
     next_size = 0;
     memcpy(&next_size, buf_now, sizeof(uint32_t));
@@ -110,6 +114,8 @@ Base::Base(char* buffer, uint64_t size, const int samplesPerPixel) {
     CHECK_EQ(success, true);
     buf_now += next_size;
     sampler = sampler::from_protobuf(proto_sampler, samplesPerPixel);
+
+    printf("parsed sampler\n");
 
     uint32_t num_lights = 0;
     memcpy(&num_lights, buf_now, sizeof(uint32_t));
@@ -124,6 +130,8 @@ Base::Base(char* buffer, uint64_t size, const int samplesPerPixel) {
         buf_now += next_size;
         lights.push_back(move(light::from_protobuf(proto_light)));
     }
+
+    printf("parsed lights\n");
 
     next_size = 0;
     memcpy(&next_size, buf_now, sizeof(uint32_t));

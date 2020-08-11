@@ -37,19 +37,19 @@
 
 namespace pbrt {
 
-STAT_COUNTER("Intersections/Regular ray intersection tests",
-             nIntersectionTests);
-STAT_COUNTER("Intersections/Shadow ray intersection tests", nShadowTests);
+//STAT_COUNTER("Intersections/Regular ray intersection tests",
+//             nIntersectionTests);
+//STAT_COUNTER("Intersections/Shadow ray intersection tests", nShadowTests);
 
 // Scene Method Definitions
 bool Scene::Intersect(const Ray &ray, SurfaceInteraction *isect) const {
-    ++nIntersectionTests;
+    //++nIntersectionTests;
     DCHECK_NE(ray.d, Vector3f(0,0,0));
     return aggregate->Intersect(ray, isect);
 }
 
 bool Scene::IntersectP(const Ray &ray) const {
-    ++nShadowTests;
+    //++nShadowTests;
     DCHECK_NE(ray.d, Vector3f(0,0,0));
     return aggregate->IntersectP(ray);
 }

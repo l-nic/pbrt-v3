@@ -53,7 +53,7 @@ SpotLight::SpotLight(const Transform &LightToWorld,
 Spectrum SpotLight::Sample_Li(const Interaction &ref, const Point2f &u,
                               Vector3f *wi, Float *pdf,
                               VisibilityTester *vis) const {
-    ProfilePhase _(Prof::LightSample);
+    //ProfilePhase _(Prof::LightSample);
     *wi = Normalize(pLight - ref.p);
     *pdf = 1.f;
     *vis =
@@ -83,7 +83,7 @@ Float SpotLight::Pdf_Li(const Interaction &, const Vector3f &) const {
 Spectrum SpotLight::Sample_Le(const Point2f &u1, const Point2f &u2, Float time,
                               Ray *ray, Normal3f *nLight, Float *pdfPos,
                               Float *pdfDir) const {
-    ProfilePhase _(Prof::LightSample);
+    //ProfilePhase _(Prof::LightSample);
     Vector3f w = UniformSampleCone(u1, cosTotalWidth);
     *ray = Ray(pLight, LightToWorld(w), Infinity, time, mediumInterface.inside);
     *nLight = (Normal3f)ray->d;
@@ -94,7 +94,7 @@ Spectrum SpotLight::Sample_Le(const Point2f &u1, const Point2f &u2, Float time,
 
 void SpotLight::Pdf_Le(const Ray &ray, const Normal3f &, Float *pdfPos,
                        Float *pdfDir) const {
-    ProfilePhase _(Prof::LightPdf);
+    //ProfilePhase _(Prof::LightPdf);
     *pdfPos = 0;
     *pdfDir = (CosTheta(WorldToLight(ray.d)) >= cosTotalWidth)
                   ? UniformConePdf(cosTotalWidth)

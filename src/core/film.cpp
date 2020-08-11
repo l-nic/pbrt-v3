@@ -39,7 +39,7 @@
 
 namespace pbrt {
 
-STAT_MEMORY_COUNTER("Memory/Film pixels", filmPixelMemory);
+//STAT_MEMORY_COUNTER("Memory/Film pixels", filmPixelMemory);
 
 // Film Method Definitions
 Film::Film(const Point2i &resolution, const Bounds2f &cropWindow,
@@ -62,8 +62,11 @@ Film::Film(const Point2i &resolution, const Bounds2f &cropWindow,
         croppedPixelBounds;
 
     // Allocate film image storage
+    printf("creating pixel array\n");
     pixels = std::unique_ptr<Pixel[]>(new Pixel[croppedPixelBounds.Area()]);
-    filmPixelMemory += croppedPixelBounds.Area() * sizeof(Pixel);
+    // filmPixelMemory += croppedPixelBounds.Area() * sizeof(Pixel);
+
+    printf("created pixels\n");
 
     // Precompute filter weight table
     int offset = 0;
@@ -75,6 +78,7 @@ Film::Film(const Point2i &resolution, const Bounds2f &cropWindow,
             filterTable[offset] = filter->Evaluate(p);
         }
     }
+    printf("film ready\n");
 }
 
 Bounds2i Film::GetSampleBounds() const {
@@ -211,6 +215,7 @@ void Film::WriteImage(Float splatScale) {
 }
 
 Film *CreateFilm(const ParamSet &params, std::unique_ptr<Filter> filter) {
+    printf("create film 0\n");
     std::string filename;
     if (PbrtOptions.imageFile != "") {
         filename = PbrtOptions.imageFile;
@@ -223,6 +228,7 @@ Film *CreateFilm(const ParamSet &params, std::unique_ptr<Filter> filter) {
     } else
         filename = params.FindOneString("filename", "pbrt.exr");
 
+    printf("1\n");
     int xres = params.FindOneInt("xresolution", 1280);
     int yres = params.FindOneInt("yresolution", 720);
     if (PbrtOptions.quickRender) xres = std::max(1, xres / 4);
@@ -230,6 +236,7 @@ Film *CreateFilm(const ParamSet &params, std::unique_ptr<Filter> filter) {
     Bounds2f crop;
     int cwi;
     const Float *cr = params.FindFloat("cropwindow", &cwi);
+    printf("2\n");
     if (cr && cwi == 4) {
         crop.pMin.x = Clamp(std::min(cr[0], cr[1]), 0.f, 1.f);
         crop.pMax.x = Clamp(std::max(cr[0], cr[1]), 0.f, 1.f);
@@ -243,6 +250,7 @@ Film *CreateFilm(const ParamSet &params, std::unique_ptr<Filter> filter) {
                         Point2f(Clamp(PbrtOptions.cropWindow[0][1], 0, 1),
                                 Clamp(PbrtOptions.cropWindow[1][1], 0, 1)));
 
+    printf("3\n");
     Float scale = params.FindOneFloat("scale", 1.);
     Float diagonal = params.FindOneFloat("diagonal", 35.);
     Float maxSampleLuminance = params.FindOneFloat("maxsampleluminance",

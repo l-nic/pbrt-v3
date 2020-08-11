@@ -41,14 +41,14 @@ namespace pbrt {
 // Shape Method Definitions
 Shape::~Shape() {}
 
-STAT_COUNTER("Scene/Shapes created", nShapesCreated);
+//STAT_COUNTER("Scene/Shapes created", nShapesCreated);
 Shape::Shape(const Transform *ObjectToWorld, const Transform *WorldToObject,
              bool reverseOrientation)
     : ObjectToWorld(ObjectToWorld),
       WorldToObject(WorldToObject),
       reverseOrientation(reverseOrientation),
       transformSwapsHandedness(ObjectToWorld->SwapsHandedness()) {
-    ++nShapesCreated;
+    //++nShapesCreated;
 }
 
 Bounds3f Shape::WorldBound() const { return (*ObjectToWorld)(ObjectBound()); }

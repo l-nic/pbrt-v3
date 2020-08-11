@@ -98,7 +98,7 @@ Spectrum InfiniteAreaLight::Le(const RayDifferential &ray) const {
 Spectrum InfiniteAreaLight::Sample_Li(const Interaction &ref, const Point2f &u,
                                       Vector3f *wi, Float *pdf,
                                       VisibilityTester *vis) const {
-    ProfilePhase _(Prof::LightSample);
+    //ProfilePhase _(Prof::LightSample);
     // Find $(u,v)$ sample coordinates in infinite light texture
     Float mapPdf;
     Point2f uv = distribution->SampleContinuous(u, &mapPdf);
@@ -122,7 +122,7 @@ Spectrum InfiniteAreaLight::Sample_Li(const Interaction &ref, const Point2f &u,
 }
 
 Float InfiniteAreaLight::Pdf_Li(const Interaction &, const Vector3f &w) const {
-    ProfilePhase _(Prof::LightPdf);
+    //ProfilePhase _(Prof::LightPdf);
     Vector3f wi = WorldToLight(w);
     Float theta = SphericalTheta(wi), phi = SphericalPhi(wi);
     Float sinTheta = std::sin(theta);
@@ -134,7 +134,7 @@ Float InfiniteAreaLight::Pdf_Li(const Interaction &, const Vector3f &w) const {
 Spectrum InfiniteAreaLight::Sample_Le(const Point2f &u1, const Point2f &u2,
                                       Float time, Ray *ray, Normal3f *nLight,
                                       Float *pdfPos, Float *pdfDir) const {
-    ProfilePhase _(Prof::LightSample);
+    //ProfilePhase _(Prof::LightSample);
     // Compute direction for infinite light sample ray
     Point2f u = u1;
 
@@ -164,7 +164,7 @@ Spectrum InfiniteAreaLight::Sample_Le(const Point2f &u1, const Point2f &u2,
 
 void InfiniteAreaLight::Pdf_Le(const Ray &ray, const Normal3f &, Float *pdfPos,
                                Float *pdfDir) const {
-    ProfilePhase _(Prof::LightPdf);
+    //ProfilePhase _(Prof::LightPdf);
     Vector3f d = -WorldToLight(ray.d);
     Float theta = SphericalTheta(d), phi = SphericalPhi(d);
     Point2f uv(phi * Inv2Pi, theta * InvPi);

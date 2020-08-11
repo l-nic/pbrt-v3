@@ -62,7 +62,7 @@ namespace pbrt {
 
 Loc *parserLoc;
 
-STAT_MEMORY_COUNTER("Memory/Tokenizer buffers", tokenizerMemory);
+//STAT_MEMORY_COUNTER("Memory/Tokenizer buffers", tokenizerMemory);
 
 static char decodeEscaped(int ch) {
     switch (ch) {
@@ -208,7 +208,7 @@ Tokenizer::Tokenizer(std::string str,
       contents(std::move(str)) {
     pos = contents.data();
     end = pos + contents.size();
-    tokenizerMemory += contents.size();
+    //tokenizerMemory += contents.size();
 }
 
 #if defined(PBRT_HAVE_MMAP) || defined(PBRT_IS_WINDOWS)

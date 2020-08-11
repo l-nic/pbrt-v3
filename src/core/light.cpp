@@ -40,8 +40,8 @@
 
 namespace pbrt {
 
-STAT_COUNTER("Scene/Lights", numLights);
-STAT_COUNTER("Scene/AreaLights", numAreaLights);
+//STAT_COUNTER("Scene/Lights", numLights);
+//STAT_COUNTER("Scene/AreaLights", numAreaLights);
 
 // Light Method Definitions
 Light::Light(int flags, const Transform &LightToWorld,
@@ -51,7 +51,7 @@ Light::Light(int flags, const Transform &LightToWorld,
       mediumInterface(mediumInterface),
       LightToWorld(LightToWorld),
       WorldToLight(Inverse(LightToWorld)) {
-    ++numLights;
+    //++numLights;
 }
 
 Light::~Light() {}
@@ -85,7 +85,7 @@ Spectrum Light::Le(const RayDifferential &ray) const { return Spectrum(0.f); }
 AreaLight::AreaLight(const Transform &LightToWorld, const MediumInterface &medium,
                      int nSamples)
     : Light((int)LightFlags::Area, LightToWorld, medium, nSamples) {
-    ++numAreaLights;
+    //++numAreaLights;
 }
 
 }  // namespace pbrt

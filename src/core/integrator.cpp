@@ -45,7 +45,7 @@
 
 namespace pbrt {
 
-STAT_COUNTER("Integrator/Camera rays traced", nCameraRays);
+//STAT_COUNTER("Integrator/Camera rays traced", nCameraRays);
 
 // Integrator Method Definitions
 Integrator::~Integrator() {}
@@ -55,7 +55,7 @@ Spectrum UniformSampleAllLights(const Interaction &it, const Scene &scene,
                                 MemoryArena &arena, Sampler &sampler,
                                 const std::vector<int> &nLightSamples,
                                 bool handleMedia) {
-    ProfilePhase p(Prof::DirectLighting);
+    //ProfilePhase p(Prof::DirectLighting);
     Spectrum L(0.f);
     for (size_t j = 0; j < scene.lights.size(); ++j) {
         // Accumulate contribution of _j_th light to _L_
@@ -85,7 +85,7 @@ Spectrum UniformSampleAllLights(const Interaction &it, const Scene &scene,
 Spectrum UniformSampleOneLight(const Interaction &it, const Scene &scene,
                                MemoryArena &arena, Sampler &sampler,
                                bool handleMedia, const Distribution1D *lightDistrib) {
-    ProfilePhase p(Prof::DirectLighting);
+    //ProfilePhase p(Prof::DirectLighting);
     // Randomly choose a single light to sample, _light_
     int nLights = int(scene.lights.size());
     if (nLights == 0) return Spectrum(0.f);
@@ -262,7 +262,7 @@ void SamplerIntegrator::Render(const Scene &scene) {
             // Loop over pixels in tile to render them
             for (Point2i pixel : tileBounds) {
                 {
-                    ProfilePhase pp(Prof::StartPixel);
+                    //ProfilePhase pp(Prof::StartPixel);
                     tileSampler->StartPixel(pixel);
                 }
 
@@ -284,7 +284,7 @@ void SamplerIntegrator::Render(const Scene &scene) {
                         camera->GenerateRayDifferential(cameraSample, &ray);
                     ray.ScaleDifferentials(
                         1 / std::sqrt((Float)tileSampler->samplesPerPixel));
-                    ++nCameraRays;
+                    //++nCameraRays;
 
                     // Evaluate radiance along camera ray
                     Spectrum L(0.f);
