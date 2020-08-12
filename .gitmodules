@@ -3,7 +3,7 @@
 	url = https://github.com/wjakob/openexr
 [submodule "src/ext/zlib"]
 	path = src/ext/zlib
-	url = https://github.com/mitsuba-renderer/zlib
+	url = https://github.com/l-nic/zlib
 [submodule "src/ext/glog"]
 	path = src/ext/glog
 	url = https://github.com/l-nic/glog.git

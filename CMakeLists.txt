@@ -75,7 +75,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-conversion-null")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-conversion-null -mcmodel=medany")
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register")
@@ -505,6 +505,7 @@ ADD_LIBRARY ( pbrt STATIC
   ${PBRT_CORE_HEADERS}
   ${PBRT_SOURCE}
   )
+set_target_properties(pbrt PROPERTIES LINK_FLAGS "-T /home/amallery/chipyard/tests/link.ld -nostartfiles -lgcc")
 ADD_SANITIZERS ( pbrt )
 
 TARGET_INCLUDE_DIRECTORIES ( pbrt PUBLIC
@@ -547,6 +548,7 @@ SET(ALL_PBRT_LIBS
   ${ZLIB_LIBRARY}
   ${Protobuf_LIBRARIES}
 )
+
 
 # Main renderer
 ADD_EXECUTABLE ( pbrt_exe src/main/pbrt.cpp )
