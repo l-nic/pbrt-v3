@@ -15,10 +15,10 @@ using namespace std;
 
 namespace pbrt {
 
-STAT_COUNTER("Integrator/Camera rays generated", nCameraRays);
-STAT_COUNTER("Integrator/Total rays traced", totalRays);
-STAT_COUNTER("Intersections/Regular ray intersection tests",
-             nIntersectionTests);
+// STAT_COUNTER("Integrator/Camera rays generated", nCameraRays);
+// STAT_COUNTER("Integrator/Total rays traced", totalRays);
+// STAT_COUNTER("Intersections/Regular ray intersection tests",
+//              nIntersectionTests);
 
 namespace scene {
 
@@ -38,26 +38,26 @@ Base::Base(const std::string &path, const int samplesPerPixel) {
 
     PbrtOptions.nThreads = 1;
 
-    manager.init(path);
+    manager->init(path);
 
-    auto reader = manager.GetReader(ObjectType::Camera);
+    auto reader = manager->GetReader(ObjectType::Camera);
     protobuf::Camera proto_camera;
     reader->read(&proto_camera);
     camera = camera::from_protobuf(proto_camera, transformCache);
 
-    reader = manager.GetReader(ObjectType::Sampler);
+    reader = manager->GetReader(ObjectType::Sampler);
     protobuf::Sampler proto_sampler;
     reader->read(&proto_sampler);
     sampler = sampler::from_protobuf(proto_sampler, samplesPerPixel);
 
-    reader = manager.GetReader(ObjectType::Lights);
+    reader = manager->GetReader(ObjectType::Lights);
     while (!reader->eof()) {
         protobuf::Light proto_light;
         reader->read(&proto_light);
         lights.push_back(move(light::from_protobuf(proto_light)));
     }
 
-    reader = manager.GetReader(ObjectType::Scene);
+    reader = manager->GetReader(ObjectType::Scene);
     protobuf::Scene proto_scene;
     reader->read(&proto_scene);
     fakeScene = make_unique<Scene>(from_protobuf(proto_scene));
@@ -67,11 +67,11 @@ Base::Base(const std::string &path, const int samplesPerPixel) {
     }
 
     printf("Loading treelet count\n");
-    const auto treeletCount = manager.treeletCount();
+    const auto treeletCount = manager->treeletCount();
     treeletDependencies.resize(treeletCount);
 
     for (TreeletId i = 0; i < treeletCount; i++) {
-        treeletDependencies[i] = manager.getTreeletDependencies(i);
+        treeletDependencies[i] = manager->getTreeletDependencies(i);
     }
 
     printf("Loaded manifest\n");
@@ -92,7 +92,7 @@ Base::Base(char* buffer, uint64_t size, const int samplesPerPixel) {
 
     PbrtOptions.nThreads = 1;
 
-    // manager.init(path);
+    // manager->init(path);
     char* buf_now = buffer;
     uint32_t next_size = 0;
     memcpy(&next_size, buf_now, sizeof(uint32_t));
@@ -142,16 +142,20 @@ Base::Base(char* buffer, uint64_t size, const int samplesPerPixel) {
     buf_now += next_size;
     fakeScene = make_unique<Scene>(from_protobuf(proto_scene));
 
+    printf("parsed scene\n");
+
     for (auto &light : lights) {
         light->Preprocess(*fakeScene);
     }
 
-    manager.useNetwork(&buf_now); // Extra layer of indirection allows the manager to update buf_now in case we want to use it again later.
-    const auto treeletCount = manager.treeletCount();
+    printf("ran preprocess\n");
+
+    manager->useNetwork(&buf_now); // Extra layer of indirection allows the manager to update buf_now in case we want to use it again later.
+    const auto treeletCount = manager->treeletCount();
     treeletDependencies.resize(treeletCount);
 
     for (TreeletId i = 0; i < treeletCount; i++) {
-        treeletDependencies[i] = manager.getTreeletDependencies(i);
+        treeletDependencies[i] = manager->getTreeletDependencies(i);
     }
 
     this->samplesPerPixel = sampler->samplesPerPixel;
@@ -234,7 +238,7 @@ void SerializeBaseToBuffer(string camera_filename, string lights_filename, strin
 shared_ptr<CloudBVH> LoadTreelet(const string &path, const TreeletId treeletId,
                                  istream *stream) {
     using namespace pbrt::global;
-    manager.init(path);
+    manager->init(path);
     shared_ptr<CloudBVH> treelet = make_shared<CloudBVH>(treeletId);
     treelet->LoadTreelet(treeletId, stream);
     return treelet;
@@ -243,7 +247,7 @@ shared_ptr<CloudBVH> LoadTreelet(const string &path, const TreeletId treeletId,
 shared_ptr<CloudBVH> LoadNetworkTreelet(const TreeletId treeletId,
                                  char* buffer, uint64_t size) {
     using namespace pbrt::global;
-    // manager.init(path);
+    // manager->init(path);
     printf("attempting to load network treelet\n");
     shared_ptr<CloudBVH> treelet = make_shared<CloudBVH>(treeletId);
     treelet->LoadNetworkTreelet(treeletId, buffer, size);
@@ -345,9 +349,9 @@ RayStatePtr GenerateCameraRay(const shared_ptr<Camera> &camera,
     state.remainingBounces = maxDepth - 1;
     state.StartTrace();
 
-    ++nCameraRays;
-    ++nIntersectionTests;
-    ++totalRays;
+    //++nCameraRays;
+    //++nIntersectionTests;
+    //++totalRays;
 
     return statePtr;
 }

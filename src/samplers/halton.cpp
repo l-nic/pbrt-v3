@@ -65,6 +65,7 @@ static void extendedGCD(uint64_t a, uint64_t b, int64_t *x, int64_t *y) {
 HaltonSampler::HaltonSampler(int samplesPerPixel, const Bounds2i &sampleBounds,
                              bool sampleAtPixelCenter)
     : GlobalSampler(samplesPerPixel), sampleAtPixelCenter(sampleAtPixelCenter) {
+        printf("creating halton sampler\n");
     // Generate random digit permutations for Halton sampler
     if (radicalInversePermutations.empty()) {
         RNG rng;
@@ -90,6 +91,7 @@ HaltonSampler::HaltonSampler(int samplesPerPixel, const Bounds2i &sampleBounds,
     // Compute multiplicative inverses for _baseScales_
     multInverse[0] = multiplicativeInverse(baseScales[1], baseScales[0]);
     multInverse[1] = multiplicativeInverse(baseScales[0], baseScales[1]);
+    printf("created halton sampler\n");
 }
 
 std::vector<uint16_t> HaltonSampler::radicalInversePermutations;

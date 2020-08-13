@@ -73,7 +73,7 @@ class SceneManager {
 };
 
 namespace global {
-extern SceneManager manager;
+extern SceneManager *manager;
 }
 
 }  // namespace pbrt

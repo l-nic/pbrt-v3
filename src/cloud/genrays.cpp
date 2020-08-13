@@ -18,14 +18,14 @@ void usage(const char *argv0) { cerr << argv0 << " SCENE-DATA OUTPUT" << endl; }
 
 shared_ptr<Camera> loadCamera(const string &scenePath,
                               vector<unique_ptr<Transform>> &transformCache) {
-    auto reader = global::manager.GetReader(ObjectType::Camera);
+    auto reader = global::manager->GetReader(ObjectType::Camera);
     protobuf::Camera proto_camera;
     reader->read(&proto_camera);
     return camera::from_protobuf(proto_camera, transformCache);
 }
 
 shared_ptr<GlobalSampler> loadSampler(const string &scenePath) {
-    auto reader = global::manager.GetReader(ObjectType::Sampler);
+    auto reader = global::manager->GetReader(ObjectType::Sampler);
     protobuf::Sampler proto_sampler;
     reader->read(&proto_sampler);
     return sampler::from_protobuf(proto_sampler);
@@ -45,7 +45,7 @@ int main(int argc, char const *argv[]) {
         const string scenePath{argv[1]};
         const string outputPath{argv[2]};
 
-        global::manager.init(scenePath);
+        global::manager->init(scenePath);
 
         vector<unique_ptr<Transform>> transformCache;
         shared_ptr<GlobalSampler> sampler = loadSampler(scenePath);

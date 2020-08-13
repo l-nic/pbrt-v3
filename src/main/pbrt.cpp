@@ -144,19 +144,19 @@ int main(int argc, char *argv[]) {
             if (i + 1 == argc)
                 usage("missing value after --dumpscene argument");
             options.dumpScene = true;
-            global::manager.init(argv[++i]);
+            global::manager->init(argv[++i]);
         } else if (!strncmp(argv[i], "--dumpscene=", 12)) {
             options.dumpScene = true;
-            global::manager.init(&argv[i][12]);
+            global::manager->init(&argv[i][12]);
         } else if (!strcmp(argv[i], "--loadscene") ||
                    !strcmp(argv[i], "-loadscene")) {
             if (i + 1 == argc)
                 usage("missing value after --loadscene argument");
             options.loadScene = true;
-            global::manager.init(argv[++i]);
+            global::manager->init(argv[++i]);
         } else if (!strncmp(argv[i], "--loadscene=", 12)) {
             options.loadScene = true;
-            global::manager.init(&argv[i][12]);
+            global::manager->init(&argv[i][12]);
         } else if (!strcmp(argv[i], "--nomaterial")) {
             options.dumpMaterials = false;
         } else if (!strcmp(argv[i], "--directional")) {

@@ -2492,7 +2492,9 @@ std::vector<uint16_t> ComputeRadicalInversePermutations(RNG &rng) {
     // Allocate space in _perms_ for radical inverse permutations
     int permArraySize = 0;
     for (int i = 0; i < PrimeTableSize; ++i) permArraySize += Primes[i];
+    printf("trying to build an array of %d shorts\n", permArraySize);
     perms.resize(permArraySize);
+    printf("built array\n");
     uint16_t *p = &perms[0];
     for (int i = 0; i < PrimeTableSize; ++i) {
         // Generate random permutation for $i$th prime base

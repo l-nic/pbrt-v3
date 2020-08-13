@@ -14,6 +14,8 @@
 
 namespace pbrt {
 
+class SceneManager;
+SceneManager* CreateSceneManager();
 class GlobalSampler;
 class CloudBVH;
 class Sample;

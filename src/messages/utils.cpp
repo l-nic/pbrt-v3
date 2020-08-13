@@ -221,11 +221,11 @@ protobuf::TextureParams to_protobuf(const TextureParams& texture_params) {
     *params.mutable_material_params() =
         to_protobuf(texture_params.GetMaterialParams());
     for (auto& kv : texture_params.GetFloatTextures()) {
-        int id = global::manager.getId(kv.second.get());
+        int id = global::manager->getId(kv.second.get());
         (*params.mutable_float_textures())[kv.first] = id;
     }
     for (auto& kv : texture_params.GetSpectrumTextures()) {
-        int id = global::manager.getId(kv.second.get());
+        int id = global::manager->getId(kv.second.get());
         (*params.mutable_spectrum_textures())[kv.first] = id;
     }
     return params;
@@ -445,7 +445,7 @@ TextureParams from_protobuf(
 
     for (auto& kv : texture_params.float_textures()) {
         auto texture_reader =
-            global::manager.GetReader(ObjectType::FloatTexture, kv.second);
+            global::manager->GetReader(ObjectType::FloatTexture, kv.second);
         protobuf::FloatTexture texture;
         texture_reader->read(&texture);
         fTex[kv.first] = float_texture::from_protobuf(texture);
@@ -453,7 +453,7 @@ TextureParams from_protobuf(
     for (auto& kv : texture_params.spectrum_textures()) {
         // Load the texture
         auto texture_reader =
-            global::manager.GetReader(ObjectType::SpectrumTexture, kv.second);
+            global::manager->GetReader(ObjectType::SpectrumTexture, kv.second);
         protobuf::SpectrumTexture texture;
         texture_reader->read(&texture);
         sTex[kv.first] = spectrum_texture::from_protobuf(texture);
@@ -535,7 +535,7 @@ shared_ptr<GlobalSampler> sampler::from_protobuf(const protobuf::Sampler& ps,
         paramSet.AddInt("pixelsamples", move(pixelSamples), 1);
     }
 
-    printf("sampler 3\n");
+    printf("sampler 3 %s\n", name.c_str());
 
     if (name == "lowdiscrepancy" || name == "02sequence") {
         // sampler = CreateZeroTwoSequenceSampler(paramSet);
@@ -554,6 +554,7 @@ shared_ptr<GlobalSampler> sampler::from_protobuf(const protobuf::Sampler& ps,
         // sampler = CreateStratifiedSampler(paramSet);
         throw runtime_error("Unsupported sampler");
     } else {
+        printf("unknown sampler name %s\n", name.c_str());
         throw runtime_error("unknown sampler name");
     }
     printf("sampler 4\n");
@@ -594,8 +595,8 @@ shared_ptr<Camera> camera::from_protobuf(
     vector<unique_ptr<Transform>>& transformCache) {
     /* (1) create the filter */
     Filter* filterPtr = nullptr;
-
-    printf("camera from protobuf\n");
+    uint32_t a = 12;
+    printf("%d\n", a);
     const auto& proto_filter = proto_camera.film().filter();
     const auto& filter_name = proto_filter.name();
     const auto filter_paramset = pbrt::from_protobuf(proto_filter.paramset());
@@ -629,7 +630,7 @@ shared_ptr<Camera> camera::from_protobuf(
     if (film_name == "image") {
         film = CreateFilm(film_paramset, move(filter));
     } else {
-        printf("no film name\n");
+        printf("no film name, given %s\n", film_name.c_str());
         throw runtime_error("unknown film name");
     }
 
@@ -643,6 +644,8 @@ shared_ptr<Camera> camera::from_protobuf(
     const auto& name = proto_camera.name();
     const auto paramset = pbrt::from_protobuf(proto_camera.paramset());
     const auto& transform = proto_camera.camera_to_world();
+
+    printf("3.1\n");
 
     transformCache.push_back(make_unique<Transform>(
         pbrt::from_protobuf(transform.start_transform())));

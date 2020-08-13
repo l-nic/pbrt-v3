@@ -118,7 +118,7 @@ void CloudBVH::loadTreelet(const uint32_t root_id, istream *stream) const {
     unique_ptr<protobuf::RecordReader> reader;
 
     if (stream == nullptr) {
-        reader = global::manager.GetReader(ObjectType::Treelet, root_id);
+        reader = global::manager->GetReader(ObjectType::Treelet, root_id);
     } else {
         reader = make_unique<protobuf::RecordReader>(stream);
     }
@@ -248,7 +248,7 @@ void CloudBVH::loadTreelet(const uint32_t root_id, istream *stream) const {
             const auto material_id = triangle_mesh_material_ids_[tm_id];
             /* load the Material if necessary */
             if (materials_.count(material_id) == 0) {
-                auto material_reader = global::manager.GetReader(
+                auto material_reader = global::manager->GetReader(
                     ObjectType::Material, material_id);
                 protobuf::Material material;
                 material_reader->read(&material);
@@ -305,7 +305,7 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
     // unique_ptr<protobuf::RecordReader> reader;
 
     // if (stream == nullptr) {
-    //     reader = global::manager.GetReader(ObjectType::Treelet, root_id);
+    //     reader = global::manager->GetReader(ObjectType::Treelet, root_id);
     // } else {
     //     reader = make_unique<protobuf::RecordReader>(stream);
     // }
@@ -497,7 +497,7 @@ void CloudBVH::loadNetworkTreelet(const uint32_t root_id, char* buffer, uint64_t
             const auto material_id = triangle_mesh_material_ids_[tm_id];
             /* load the Material if necessary */
             // if (materials_.count(material_id) == 0) {
-            //     auto material_reader = global::manager.GetReader(
+            //     auto material_reader = global::manager->GetReader(
             //         ObjectType::Material, material_id);
             //     protobuf::Material material;
             //     material_reader->read(&material);

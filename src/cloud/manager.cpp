@@ -99,6 +99,10 @@ void SceneManager::recordDependency(const ObjectKey& from,
     dependencies[from].insert(to);
 }
 
+SceneManager* CreateSceneManager() {
+    return new SceneManager();
+}
+
 protobuf::Manifest SceneManager::makeManifest() const {
     protobuf::Manifest manifest;
     /* add ids for all objects */
@@ -150,6 +154,13 @@ void SceneManager::useNetwork(char** buf_now) {
     _buf_now = buf_now;
 }
 
+extern "C" {
+extern char* current_brk;
+void __attribute__ ((noinline)) breakpoint_func() {
+    printf("Hi\n");
+}
+};
+
 void SceneManager::loadManifest() {
     protobuf::Manifest manifest;
     if (_use_network) {
@@ -162,16 +173,25 @@ void SceneManager::loadManifest() {
         CHECK_EQ(success, true);
         buf_now += next_size;
         *_buf_now = buf_now;
+        printf("manifest is loaded\n");
     } else {
         auto reader = GetReader(ObjectType::Manifest);
         reader->read(&manifest);
     }
 
     for (const protobuf::Manifest::Object& obj : manifest.objects()) {
+        printf("loading object\n");
         ObjectKey id = from_protobuf(obj.id());
+        uint32_t stack_obj = 2;
+        printf("stack is at %#lx, brk is at %#lx\n", &stack_obj, current_brk);
+        printf("1\n");
+        breakpoint_func();
         objectSizes[id] = obj.size();
+        printf("1.01\n");
         dependencies[id] = {};
+        printf("1.1\n");
         for (const protobuf::ObjectKey& dep : obj.dependencies()) {
+            printf("2\n");
             dependencies[id].insert(from_protobuf(dep));
         }
     }
@@ -252,7 +272,7 @@ vector<double> SceneManager::getTreeletProbs() const {
 }
 
 namespace global {
-SceneManager manager;
+SceneManager *manager;
 }
 
 }  // namespace pbrt

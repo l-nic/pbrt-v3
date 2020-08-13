@@ -24,11 +24,11 @@ int main(int argc, char *argv[]) {
 
     mkdir(bboxDir.c_str(), 0777);
 
-    global::manager.init(sceneDir);
-    uint32_t numTreelets = global::manager.treeletCount();
+    global::manager->init(sceneDir);
+    uint32_t numTreelets = global::manager->treeletCount();
 
     for (uint32_t i = 0; i < numTreelets; i++) {
-        auto treelet = global::manager.GetReader(ObjectType::Treelet, i);
+        auto treelet = global::manager->GetReader(ObjectType::Treelet, i);
         uint32_t numMeshes;
         treelet->read(&numMeshes);
         treelet->skip(numMeshes);

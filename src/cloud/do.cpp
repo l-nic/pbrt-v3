@@ -20,7 +20,7 @@ void usage(const char *argv0) {
 
 vector<shared_ptr<Light>> loadLights() {
     vector<shared_ptr<Light>> lights;
-    auto reader = global::manager.GetReader(ObjectType::Lights);
+    auto reader = global::manager->GetReader(ObjectType::Lights);
 
     while (!reader->eof()) {
         protobuf::Light proto_light;
@@ -32,21 +32,21 @@ vector<shared_ptr<Light>> loadLights() {
 }
 
 shared_ptr<Camera> loadCamera(vector<unique_ptr<Transform>> &transformCache) {
-    auto reader = global::manager.GetReader(ObjectType::Camera);
+    auto reader = global::manager->GetReader(ObjectType::Camera);
     protobuf::Camera proto_camera;
     reader->read(&proto_camera);
     return camera::from_protobuf(proto_camera, transformCache);
 }
 
 shared_ptr<GlobalSampler> loadSampler() {
-    auto reader = global::manager.GetReader(ObjectType::Sampler);
+    auto reader = global::manager->GetReader(ObjectType::Sampler);
     protobuf::Sampler proto_sampler;
     reader->read(&proto_sampler);
     return sampler::from_protobuf(proto_sampler);
 }
 
 Scene loadFakeScene() {
-    auto reader = global::manager.GetReader(ObjectType::Scene);
+    auto reader = global::manager->GetReader(ObjectType::Scene);
     protobuf::Scene proto_scene;
     reader->read(&proto_scene);
     return from_protobuf(proto_scene);
@@ -71,7 +71,7 @@ int main(int argc, char const *argv[]) {
         const string scenePath{argv[1]};
         const string raysPath{argv[2]};
 
-        global::manager.init(scenePath);
+        global::manager->init(scenePath);
 
         queue<RayStatePtr> rayList;
         vector<Sample> samples;
@@ -105,7 +105,7 @@ int main(int argc, char const *argv[]) {
         auto fakeScene = loadFakeScene();
 
         vector<unique_ptr<CloudBVH>> treelets;
-        treelets.resize(global::manager.treeletCount());
+        treelets.resize(global::manager->treeletCount());
 
         /* let's load all the treelets */
         for (size_t i = 0; i < treelets.size(); i++) {
