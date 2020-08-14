@@ -40,6 +40,7 @@
 #include "interaction.h"
 #include "stats.h"
 #include <stdarg.h>
+#include <sstream>
 
 namespace pbrt {
 
@@ -723,8 +724,11 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
             break;
         }
     CHECK(bxdf != nullptr);
-    VLOG(2) << "BSDF::Sample_f chose comp = " << comp << " / matching = " <<
+    std::stringstream ss;
+    ss << "BSDF::Sample_f chose comp = " << comp << " / matching = " <<
         matchingComps << ", bxdf: " << bxdf->ToString();
+    printf("%s\n", ss.str().c_str());
+    ss.clear();
 
     // Remap _BxDF_ sample _u_ to $[0,1)^2$
     Point2f uRemapped(std::min(u[0] * matchingComps - comp, OneMinusEpsilon),
@@ -736,9 +740,11 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
     *pdf = 0;
     if (sampledType) *sampledType = bxdf->type;
     Spectrum f = bxdf->Sample_f(wo, &wi, uRemapped, pdf, sampledType);
-    VLOG(2) << "For wo = " << wo << ", sampled f = " << f << ", pdf = "
+    ss << "For wo = " << wo << ", sampled f = " << f << ", pdf = "
             << *pdf << ", ratio = " << ((*pdf > 0) ? (f / *pdf) : Spectrum(0.))
             << ", wi = " << wi;
+    printf("%s\n", ss.str().c_str());
+    ss.clear();
     if (*pdf == 0) {
         if (sampledType) *sampledType = BxDFType(0);
         return 0;
@@ -762,8 +768,10 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
                  (!reflect && (bxdfs[i]->type & BSDF_TRANSMISSION))))
                 f += bxdfs[i]->f(wo, wi);
     }
-    VLOG(2) << "Overall f = " << f << ", pdf = " << *pdf << ", ratio = "
+    ss << "Overall f = " << f << ", pdf = " << *pdf << ", ratio = "
             << ((*pdf > 0) ? (f / *pdf) : Spectrum(0.));
+    printf("%s\n", ss.str().c_str());
+    ss.clear();
     return f;
 }
 
